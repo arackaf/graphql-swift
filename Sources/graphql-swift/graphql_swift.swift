@@ -4,3 +4,4 @@ public struct graphql_swift {
     public init() {
     }
 }
+
