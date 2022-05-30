@@ -1,6 +1,6 @@
 import Foundation
 
-extension Dictionary where Key == String {
+public extension Dictionary where Key == String {
     func val(_ key: String) -> [String: Any]? {
         return self[key] as? [String:Any]
     }
@@ -14,19 +14,19 @@ extension Dictionary where Key == String {
     }
 }
 
-extension Array where Element == Dictionary<String, Any> {
-    func produce<T>() -> [T]? where T:InitializableFromJSON {
+public extension Array where Element == Dictionary<String, Any> {
+    func produce<T>() -> [T]? where T: InitializableFromJSON {
         return self.map { T($0) }
     }
 }
 
-protocol InitializableFromJSON {
+public protocol InitializableFromJSON {
     init(_ json: [String: Any])
 }
 
-struct GraphqlFieldType: InitializableFromJSON {
-    let name: String
-    let type: String
+public struct GraphqlFieldType: InitializableFromJSON {
+    public let name: String
+    public let type: String
     
     static func getType(_ json: [String: Any]) -> String {
         let kind: String? = json.get("kind")
@@ -38,18 +38,18 @@ struct GraphqlFieldType: InitializableFromJSON {
         }
     }
     
-    init(_ json: [String: Any]){
+    public init(_ json: [String: Any]){
         name = json.get("name")!
         let typeField = json.val("type")!
         type = Self.getType(typeField)
     }
 }
 
-struct GraphqlInputType: InitializableFromJSON {
-    let name: String
-    let fields: [GraphqlFieldType]
+public struct GraphqlInputType: InitializableFromJSON {
+    public let name: String
+    public let fields: [GraphqlFieldType]
     
-    init(_ json: [String: Any]){
+    public init(_ json: [String: Any]){
         name = json.get("name")!
         fields = json.arr("inputFields")?.produce() ?? []
     }

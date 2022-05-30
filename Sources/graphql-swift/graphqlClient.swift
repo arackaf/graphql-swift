@@ -1,13 +1,13 @@
 import Foundation
 
-struct GraphqlClient {
+open class GraphqlClient {
     let url: URL!
     
-    init(_ endpoint: String) {
+    public init(_ endpoint: String) {
         url = URL(string: endpoint)!
     }
     
-    func run<T, D: Encodable>(requestBody: D, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
+    public func run<T, D: Encodable>(requestBody: D, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
         guard let graphqlRequestPacket = try? JSONEncoder().encode(requestBody) else {
             print("Error: Trying to convert model to JSON data")
             return nil
@@ -22,7 +22,7 @@ struct GraphqlClient {
         return try? await run(request: request, produceResult)
     }
 
-    func run<T>(request: URLRequest, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
+    public func run<T>(request: URLRequest, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
         let jsonResult = try await jsonRequest(request);
         
         let graphqlData = jsonResult.val("data");
