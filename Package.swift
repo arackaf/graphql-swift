@@ -13,6 +13,9 @@ let package = Package(
         .library(
             name: "graphql-swift",
             targets: ["graphql-swift"]),
+        .executable(
+            name: "graphql-swift-codegen",
+            targets: ["graphql-swift-codegen"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -23,6 +26,9 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "graphql-swift",
+            dependencies: []),
+        .executableTarget(
+            name: "graphql-swift-codegen",
             dependencies: []),
         .testTarget(
             name: "graphql-swiftTests",
