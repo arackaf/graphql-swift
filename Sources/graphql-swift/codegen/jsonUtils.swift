@@ -5,11 +5,11 @@ public protocol InitializableFromJSON {
 }
 
 public extension Dictionary where Key == String {
-    func val(_ key: String) -> [String: Any]? {
+    func object(_ key: String) -> [String: Any]? {
         return self[key] as? [String:Any]
     }
     
-    func arr(_ key: String) -> [[String: Any]]? {
+    func array(_ key: String) -> [[String: Any]]? {
         return self[key] as? [[String:Any]]
     }
     

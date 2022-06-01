@@ -15,7 +15,7 @@ public struct SchemaTypeGenerator {
         let requestData = GraphqlSchemaRequest(query: GRAPHQL_SCHEMA_INPUT_TYPES_REQUEST)
         
         let response: [GraphqlInputType]? = try await client.run(requestBody: requestData) { data in
-            data.val("__schema")?.arr("types")?.filter({ $0.get("kind") == "INPUT_OBJECT" }).produce()
+            data.object("__schema")?.array("types")?.filter({ $0.get("kind") == "INPUT_OBJECT" }).produce()
         }
         
         return response

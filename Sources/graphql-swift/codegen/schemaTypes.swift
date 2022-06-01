@@ -3,10 +3,10 @@ import Foundation
 func getType(_ json: [String: Any]) -> String {
     let kind: String? = json.get("kind")
     if kind == "LIST" {
-        let nestedType = getType(json.val("ofType")!)
+        let nestedType = getType(json.object("ofType")!)
         return "Array<\(nestedType)>"
     } else {
-        return json.get("name") ?? getType(json.val("ofType")!)
+        return json.get("name") ?? getType(json.object("ofType")!)
     }
 }
 
@@ -16,7 +16,7 @@ public struct GraphqlFieldType: InitializableFromJSON {
     
     public init(_ json: [String: Any]){
         name = json.get("name")!
-        let typeField = json.val("type")!
+        let typeField = json.object("type")!
         type = getType(typeField)
     }
 }
@@ -27,6 +27,6 @@ public struct GraphqlInputType: InitializableFromJSON {
     
     public init(_ json: [String: Any]){
         name = json.get("name")!
-        fields = json.arr("inputFields")?.produce() ?? []
+        fields = json.array("inputFields")?.produce() ?? []
     }
 }

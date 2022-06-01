@@ -25,7 +25,7 @@ open class GraphqlClient {
     public func run<T>(request: URLRequest, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
         let jsonResult = try await jsonRequest(request);
         
-        let graphqlData = jsonResult.val("data");
+        let graphqlData = jsonResult.object("data");
         guard let graphqlData = graphqlData else {
             return nil
         }
