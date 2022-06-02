@@ -7,6 +7,10 @@ struct GraphqlSchemaRequest: Codable {
 public struct SchemaTypeGenerator {
     let client: GraphqlClient
     
+    public init(client: GraphqlClient) {
+        self.client = client
+    }
+    
     public func readInputTypes() async throws -> [GraphqlInputType]? {
         let requestData = GraphqlSchemaRequest(query: graphqlSchemaInputTypesRequest)
         
