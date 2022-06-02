@@ -29,7 +29,7 @@ let package = Package(
             dependencies: []),
         .executableTarget(
             name: "graphql-swift-codegen",
-            dependencies: []),
+            dependencies: ["graphql-swift"]),
         .testTarget(
             name: "graphql-swiftTests",
             dependencies: ["graphql-swift"]),
