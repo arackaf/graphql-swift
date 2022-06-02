@@ -1,10 +1,10 @@
 import Foundation
 
 open class GraphqlClient {
-    let url: URL!
+    let endpoint: URL
     
-    public init(_ endpoint: String) {
-        url = URL(string: endpoint)!
+    public init(endpoint: URL) {
+        self.endpoint = endpoint
     }
     
     public func run<T, D: Encodable>(requestBody: D, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
@@ -13,7 +13,7 @@ open class GraphqlClient {
             return nil
         }
 
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type") // the request is JSON
         request.setValue("application/json", forHTTPHeaderField: "Accept") // the response expected to be in JSON format
@@ -25,7 +25,7 @@ open class GraphqlClient {
     public func run<T>(request: URLRequest, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
         let jsonResult = try await jsonRequest(request);
         
-        let graphqlData = jsonResult.val("data");
+        let graphqlData = jsonResult.object("data");
         guard let graphqlData = graphqlData else {
             return nil
         }

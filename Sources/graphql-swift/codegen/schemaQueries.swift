@@ -1,4 +1,4 @@
-let GRAPHQL_SCHEMA_INPUT_TYPES_REQUEST = """
+let graphqlSchemaInputTypesRequest = """
 {
   __schema {
     types {
