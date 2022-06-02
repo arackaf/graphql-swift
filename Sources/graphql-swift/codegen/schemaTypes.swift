@@ -14,7 +14,7 @@ public struct GraphqlFieldType: InitializableFromJSON {
     public let name: String
     public let type: String
     
-    public init(_ json: [String: Any]){
+    init(json: [String: Any]){
         name = json.get("name")!
         let typeField = json.object("type")!
         type = getType(typeField)
@@ -25,7 +25,7 @@ public struct GraphqlInputType: InitializableFromJSON {
     public let name: String
     public let fields: [GraphqlFieldType]
     
-    public init(_ json: [String: Any]){
+    init(json: [String: Any]){
         name = json.get("name")!
         fields = json.array("inputFields")?.produce() ?? []
     }

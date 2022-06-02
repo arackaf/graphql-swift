@@ -5,14 +5,10 @@ struct GraphqlSchemaRequest: Codable {
 }
 
 public struct SchemaTypeGenerator {
-    let client: GraphqlClient!
-    
-    public init(_ client: GraphqlClient) {
-        self.client = client
-    }
+    let client: GraphqlClient
     
     public func readInputTypes() async throws -> [GraphqlInputType]? {
-        let requestData = GraphqlSchemaRequest(query: GRAPHQL_SCHEMA_INPUT_TYPES_REQUEST)
+        let requestData = GraphqlSchemaRequest(query: graphqlSchemaInputTypesRequest)
         
         let response: [GraphqlInputType]? = try await client.run(requestBody: requestData) { data in
             data.object("__schema")?.array("types")?.filter({ $0.get("kind") == "INPUT_OBJECT" }).produce()
