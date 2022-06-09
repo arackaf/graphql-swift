@@ -5,7 +5,7 @@ for argument in CommandLine.arguments {
     print(argument)
 }
 
-let graphqlUrl = "https://mylibrary.onrender.com/graphql-public"
+let graphqlUrl = "https://mylibrary.onrender.com/graphql"
 
 func run() async {
     do {
@@ -13,18 +13,21 @@ func run() async {
         
         let client = GraphqlClient(endpoint: URL(string: graphqlUrl)!)
         let schemaGenerator = SchemaTypeGenerator(client: client)
-        let response = try await schemaGenerator.readInputTypes()
+        let inputTypesResponse = try await schemaGenerator.readInputTypes()
+        let typesResponse = try await schemaGenerator.readTypes()
+        let rootOutputUrl = URL(fileURLWithPath: "/Users/arackis/Documents/git/swift-codegen")
+
+        let inputTypeGenerator = TypeGenerator();
+
+        if let inputTypesResponse = inputTypesResponse {
+            for type in inputTypesResponse {
+                inputTypeGenerator.writeInputType(url: rootOutputUrl.appendingPathComponent("input-types"), inputType: type)
+            }
+        }
         
-        if let response = response {
-            for type in response {
-                print(type.name)
-                print("---------")
-                
-                for field in type.fields {
-                    print(field.name, field.type)
-                }
-                
-                print("\n\n")
+        if let typesResponse = typesResponse {
+            for type in typesResponse {
+                inputTypeGenerator.writeType(url: rootOutputUrl.appendingPathComponent("types"), type: type)
             }
         }
     } catch {

@@ -20,4 +20,14 @@ public struct SchemaTypeGenerator {
         
         return response
     }
+    
+    public func readTypes() async throws -> [GraphqlType]? {
+        let requestData = GraphqlSchemaRequest(query: graphqlSchemaTypesRequest)
+        
+        let response: [GraphqlType]? = try await client.run(requestBody: requestData) { data in
+            data.object("__schema")?.array("types")?.filter({ $0.get("kind") == "OBJECT" }).produce()
+        }
+        
+        return response
+    }
 }
