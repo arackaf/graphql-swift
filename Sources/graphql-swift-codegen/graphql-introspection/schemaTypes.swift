@@ -1,28 +1,32 @@
 import Foundation
 
-func getType(_ json: [String: Any]) -> String {
+func getType(_ json: [String: Any], nullable: Bool = true) -> String {
     let kind: String? = json.get("kind")
+    let modifier: String = nullable ? "?" : ""
     
     if kind == "LIST" {
         let nestedType = getType(json.object("ofType")!)
-        return "Array<\(nestedType)>"
+        return "Array<\(nestedType)>\(modifier)"
     } else if kind == "NON_NULL"{
-        return getType(json.object("ofType")!)
+        return getType(json.object("ofType")!, nullable: false)
     } else {
-        return json.get("name") ?? getType(json.object("ofType")!)
+        let name: String? = json.get("name")
+        
+        if let name = name {
+            return name + modifier
+        }
+        return getType(json.object("ofType")!, nullable: nullable)
     }
 }
 
 public struct GraphqlFieldType: InitializableFromJSON {
     public let name: String
     public let type: String
-    public let nullable: Bool
     
     init(json: [String: Any]){
         name = json.get("name")!
         let typeField = json.object("type")!
         type = getType(typeField)
-        nullable = typeField.get("kind") != "NON_NULL"
     }
 }
 
