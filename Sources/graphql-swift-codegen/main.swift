@@ -36,6 +36,14 @@ func containerValue(from container: KeyedDecodingContainer<JSONCodingKeys>, key:
     return nil
 }
 
+func process(fromSingleValue container: SingleValueDecodingContainer) -> Any? {
+    if let result = try? container.decode(Int.self) { return result }
+    if let result = try? container.decode(Double.self) { return result }
+    if let result = try? container.decode(String.self) { return result }
+    
+    return nil
+}
+
 func process(fromContainer container: KeyedDecodingContainer<JSONCodingKeys>) -> [String: Any] {
     var result: [String: Any] = [:]
     
@@ -44,14 +52,6 @@ func process(fromContainer container: KeyedDecodingContainer<JSONCodingKeys>) ->
     }
     
     return result
-}
-
-func process(fromSingleValue container: SingleValueDecodingContainer) -> Any? {
-    if let result = try? container.decode(Int.self) { return result }
-    if let result = try? container.decode(Double.self) { return result }
-    if let result = try? container.decode(String.self) { return result }
-    
-    return nil
 }
 
 func process(fromArray container: inout UnkeyedDecodingContainer) -> [Any] {
@@ -63,6 +63,9 @@ func process(fromArray container: inout UnkeyedDecodingContainer) -> [Any] {
         else if let value = try? container.decode(Double.self) { result.append(value) }
         else if let value = try? container.nestedContainer(keyedBy: JSONCodingKeys.self) {
             result.append(process(fromContainer: value))
+        }
+        else if var value = try? container.nestedUnkeyedContainer() {
+            result.append(process(fromArray: &value))
         }
     }
     
@@ -100,19 +103,19 @@ func runDecode(_ json: String) {
   _ = try? decoder.decode(Foo.self, from: data)
 }
 
-print("trying 99")
+print("trying Int")
 runDecode("""
 {"a": 12, "b": "Yo", "x": 99 }
 """)
 
 print("trying object")
 runDecode("""
-{"a": 12, "b": "Yo", "x": { "num": 12, "str": "Hi", "dbl": 1.2, "obj": { "int": 1, "o2": { "a": 1, "b": "b" } } } }
+{"a": 12, "b": "Yo", "x": { "num": 12, "str": "Hi", "dbl": 1.2, "arr": [1, 2, 3], "obj": { "int": 1, "o2": { "a": 1, "b": "b" } } } }
 """)
 
 print("trying array")
 runDecode("""
-{"a": 12, "b": "Yo", "x": ["a", "b", "c", { "i": 1, "arr": ["a", 1] }, 1, 2, 3] }
+{"a": 12, "b": "Yo", "x": ["a", "b", "c", { "i": 1, "arr": ["a", 1, [9, 8, 7, { "z": "z" }]] }, 1, 2, 3] }
 """)
 
 func run() async {
