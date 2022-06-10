@@ -29,6 +29,9 @@ func containerValue(from container: KeyedDecodingContainer<JSONCodingKeys>, key:
     if let nestedContainer = try? container.nestedContainer(keyedBy: JSONCodingKeys.self, forKey: key) {
         return process(fromContainer: nestedContainer)
     }
+    if var nestedArray = try? container.nestedUnkeyedContainer(forKey: key) {
+        return process(fromArray: &nestedArray)
+    }
     
     return nil
 }
@@ -51,6 +54,21 @@ func process(fromSingleValue container: SingleValueDecodingContainer) -> Any? {
     return nil
 }
 
+func process(fromArray container: inout UnkeyedDecodingContainer) -> [Any] {
+    var result: [Any] = []
+
+    while container.isAtEnd == false {
+        if let value = try? container.decode(String.self) { result.append(value) }
+        else if let value = try? container.decode(Int.self) { result.append(value) }
+        else if let value = try? container.decode(Double.self) { result.append(value) }
+        else if let value = try? container.nestedContainer(keyedBy: JSONCodingKeys.self) {
+            result.append(process(fromContainer: value))
+        }
+    }
+    
+    return result
+}
+
 struct JSON: Decodable {
     var value: Any?
     
@@ -59,10 +77,10 @@ struct JSON: Decodable {
             for k in junk.allKeys {
                 self.value = process(fromContainer: junk)
             }
+        } else if var junk = try? decoder.unkeyedContainer() {
+            self.value = process(fromArray: &junk)
         } else if let junk = try? decoder.singleValueContainer() {
             self.value = process(fromSingleValue: junk)
-        } else {
-            print("NOTHING")
         }
         
         print(self.value)
@@ -90,6 +108,11 @@ runDecode("""
 print("trying object")
 runDecode("""
 {"a": 12, "b": "Yo", "x": { "num": 12, "str": "Hi", "dbl": 1.2, "obj": { "int": 1, "o2": { "a": 1, "b": "b" } } } }
+""")
+
+print("trying array")
+runDecode("""
+{"a": 12, "b": "Yo", "x": ["a", "b", "c", { "i": 1, "arr": ["a", 1] }, 1, 2, 3] }
 """)
 
 func run() async {
