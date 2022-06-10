@@ -39,10 +39,8 @@ let myGroup = DispatchGroup()
 myGroup.enter()
 
 Task {
-    print("before")
-    await run()
+    //await run()
     
-    print("after")
     myGroup.leave() //// When your task completes
 }
 
