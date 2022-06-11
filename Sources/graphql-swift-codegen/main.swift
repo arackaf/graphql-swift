@@ -76,17 +76,14 @@ struct JSON: Decodable {
     var value: Any?
     
     init(from decoder: Decoder) throws {
-        if let junk = try? decoder.container(keyedBy: JSONCodingKeys.self) {
-            for k in junk.allKeys {
-                self.value = process(fromContainer: junk)
-            }
-        } else if var junk = try? decoder.unkeyedContainer() {
-            self.value = process(fromArray: &junk)
-        } else if let junk = try? decoder.singleValueContainer() {
-            self.value = process(fromSingleValue: junk)
+        if let container = try? decoder.container(keyedBy: JSONCodingKeys.self) {
+            self.value = process(fromContainer: container)
+        } else if var array = try? decoder.unkeyedContainer() {
+            self.value = process(fromArray: &array)
+        } else if let value = try? decoder.singleValueContainer() {
+            self.value = process(fromSingleValue: value)
         }
-        
-        print(self.value)
+        print(self.value!)
     }
 }
 
