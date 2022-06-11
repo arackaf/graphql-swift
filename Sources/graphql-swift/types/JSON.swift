@@ -68,6 +68,9 @@ func decode(fromArray container: inout UnkeyedDecodingContainer) -> [Any] {
 public struct JSON: Codable {
     public var value: Any?
     
+    public init(value: Any?) {
+        self.value = value
+    }
     public init(from decoder: Decoder) throws {
         if let container = try? decoder.container(keyedBy: JSONCodingKeys.self) {
             self.value = decode(fromContainer: container)
@@ -80,6 +83,7 @@ public struct JSON: Codable {
     }
     
     public func encode(to encoder: Encoder) throws {
-        
+        var container = encoder.singleValueContainer()
+        try container.encode("Ayyyyyy")
     }
 }

@@ -7,7 +7,7 @@ for argument in CommandLine.arguments {
 
 let graphqlUrl = "https://mylibrary.onrender.com/graphql"
 
-struct ThingWithJson: Decodable {
+struct ThingWithJson: Codable {
     let intVal: Int
     let stringVal: String
     let json: JSON
@@ -89,7 +89,18 @@ let resultNull = runDecode("""
 {"intVal": 12, "stringVal": "Yo", "json": null }
 """)
 
-print(resultNull)
+print(resultNull, "\n\n")
+
+func runEncode(_ movie: ThingWithJson) {
+    let encoder = JSONEncoder()
+    if let result = try? encoder.encode(movie) {
+        let json = String(data: result, encoding: .utf8)!
+        print(json)
+    }
+}
+
+let t = ThingWithJson(intVal: 12, stringVal: "Hello", json: JSON(value: "Yo"))
+runEncode(t)
 
 
 func run() async {
