@@ -93,27 +93,63 @@ struct Foo: Decodable {
     let x: JSON
 }
 
-func runDecode(_ json: String) {
+func runDecode(_ json: String) -> Foo? {
   let decoder = JSONDecoder()
   let data = json.data(using: .utf8)!
 
-  _ = try? decoder.decode(Foo.self, from: data)
+  return try? decoder.decode(Foo.self, from: data)
 }
 
 print("trying Int")
-runDecode("""
+let resultInt = runDecode("""
 {"a": 12, "b": "Yo", "x": 99 }
 """)
 
-print("trying object")
-runDecode("""
+print(resultInt?.x.value as? Int ?? "nil")
+
+print("\n\ntrying object")
+let resultObject = runDecode("""
 {"a": 12, "b": "Yo", "x": { "num": 12, "str": "Hi", "dbl": 1.2, "arr": [1, 2, 3], "obj": { "int": 1, "o2": { "a": 1, "b": "b" } } } }
 """)
 
-print("trying array")
-runDecode("""
-{"a": 12, "b": "Yo", "x": ["a", "b", "c", { "i": 1, "arr": ["a", 1, [9, 8, 7, { "z": "z" }]] }, 1, 2, 3] }
+if let map = resultObject?.x.value as? [String: Any] {
+    print("got object")
+    print(map["num"], map["dbl"])
+    
+    if let nestedMap = map["obj"] as? [String: Any] {
+        print("Got nested object")
+        print(nestedMap["int"])
+        if let nestedMap2 = nestedMap["o2"] as? [String: Any] {
+            print("Got nested object 2")
+            print(nestedMap2["a"])
+        }
+    }
+}
+
+print("\n\ntrying array")
+let resultArray = runDecode("""
+{"a": 12, "b": "Yo", "x": ["a", "b", ["c"], { "i": 1, "arr": ["a", 1, [9, 8, 7, { "z": "z" }]] }, 1, 2, 3] }
 """)
+
+if let arr = resultArray?.x.value as? [Any] {
+    print("got array")
+    print(arr[0])
+    print(arr[1])
+    print(arr[2])
+    print(arr[3])
+    
+    if let nestedObj = arr[3] as? [String: Any] {
+        print("nested object")
+        print(nestedObj["i"])
+        
+        if let nestedArr2 = nestedObj["arr"] as? [Any] {
+            print("nested arr2")
+            print(nestedArr2[0])
+        }
+    }
+}
+
+
 
 func run() async {
     do {
