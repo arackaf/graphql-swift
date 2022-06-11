@@ -20,7 +20,22 @@ func runDecode(_ json: String) -> ThingWithJson? {
   return try? decoder.decode(ThingWithJson.self, from: data)
 }
 
-print("trying Int")
+
+let json = """
+    { "a": 12, "b": "Hello", "arr": [1, 2, 3], "obj": { "nestedInt": 12, "nestedString": "str" } }
+""".data(using: .utf8)!
+
+if let jsonObject = try? JSONSerialization.jsonObject(with: json) as? [String: Any] {
+    print(jsonObject, "\n")
+    
+    if let intArray = jsonObject["arr"] as? [Int] {
+        print(intArray[0])
+    }
+}
+
+
+
+print("\n\ntrying Int")
 let resultInt = runDecode("""
 {"intVal": 12, "stringVal": "Yo", "json": 99 }
 """)
@@ -69,6 +84,12 @@ if let arr = resultArray?.json.value as? [Any] {
     }
 }
 
+print("\n\ntrying null")
+let resultNull = runDecode("""
+{"intVal": 12, "stringVal": "Yo", "json": null }
+""")
+
+print(resultNull)
 
 
 func run() async {
