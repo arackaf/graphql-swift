@@ -29,19 +29,19 @@ print(resultInt?.json.value as? Int ?? "nil")
 
 print("\n\ntrying object")
 let resultObject = runDecode("""
-{"intVal": 12, "stringVal": "Yo", "json": { "num": 12, "str": "Hi", "dbl": 1.2, "arr": [1, 2, 3], "obj": { "int": 1, "o2": { "a": 1, "b": "b" } } } }
+{"intVal": 12, "stringVal": "Yo", "json": { "num": 12, "str": "Hi", "dbl": 1.2, "arr": [1, 2, 3], "obj": { "int": 1, "o2": { "a": 88, "b": "b" } } } }
 """)
 
 if let map = resultObject?.json.value as? [String: Any] {
     print("got object")
-    print(map["num"], map["dbl"])
+    print(map["num"]!, map["dbl"]!)
     
     if let nestedMap = map["obj"] as? [String: Any] {
         print("Got nested object")
-        print(nestedMap["int"])
+        print(nestedMap["int"]!)
         if let nestedMap2 = nestedMap["o2"] as? [String: Any] {
             print("Got nested object 2")
-            print(nestedMap2["a"])
+            print(nestedMap2["a"]!)
         }
     }
 }
@@ -60,7 +60,7 @@ if let arr = resultArray?.json.value as? [Any] {
     
     if let nestedObj = arr[3] as? [String: Any] {
         print("nested object")
-        print(nestedObj["i"])
+        print(nestedObj["i"]!)
         
         if let nestedArr2 = nestedObj["arr"] as? [Any] {
             print("nested arr2")
