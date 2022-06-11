@@ -87,32 +87,32 @@ struct JSON: Decodable {
     }
 }
 
-struct Foo: Decodable {
-    let a: Int
-    let b: String
-    let x: JSON
+struct ThingWithJson: Decodable {
+    let intVal: Int
+    let stringVal: String
+    let json: JSON
 }
 
-func runDecode(_ json: String) -> Foo? {
+func runDecode(_ json: String) -> ThingWithJson? {
   let decoder = JSONDecoder()
   let data = json.data(using: .utf8)!
 
-  return try? decoder.decode(Foo.self, from: data)
+  return try? decoder.decode(ThingWithJson.self, from: data)
 }
 
 print("trying Int")
 let resultInt = runDecode("""
-{"a": 12, "b": "Yo", "x": 99 }
+{"intVal": 12, "stringVal": "Yo", "json": 99 }
 """)
 
-print(resultInt?.x.value as? Int ?? "nil")
+print(resultInt?.json.value as? Int ?? "nil")
 
 print("\n\ntrying object")
 let resultObject = runDecode("""
-{"a": 12, "b": "Yo", "x": { "num": 12, "str": "Hi", "dbl": 1.2, "arr": [1, 2, 3], "obj": { "int": 1, "o2": { "a": 1, "b": "b" } } } }
+{"intVal": 12, "stringVal": "Yo", "json": { "num": 12, "str": "Hi", "dbl": 1.2, "arr": [1, 2, 3], "obj": { "int": 1, "o2": { "a": 1, "b": "b" } } } }
 """)
 
-if let map = resultObject?.x.value as? [String: Any] {
+if let map = resultObject?.json.value as? [String: Any] {
     print("got object")
     print(map["num"], map["dbl"])
     
@@ -128,10 +128,10 @@ if let map = resultObject?.x.value as? [String: Any] {
 
 print("\n\ntrying array")
 let resultArray = runDecode("""
-{"a": 12, "b": "Yo", "x": ["a", "b", ["c"], { "i": 1, "arr": ["a", 1, [9, 8, 7, { "z": "z" }]] }, 1, 2, 3] }
+{"intVal": 12, "stringVal": "Yo", "json": ["a", "b", ["c"], { "i": 1, "arr": ["a", 1, [9, 8, 7, { "z": "z" }]] }, 1, 2, 3] }
 """)
 
-if let arr = resultArray?.x.value as? [Any] {
+if let arr = resultArray?.json.value as? [Any] {
     print("got array")
     print(arr[0])
     print(arr[1])
