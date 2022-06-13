@@ -22,11 +22,19 @@ func runDecode(_ json: String) -> ThingWithJson? {
 
 
 let json = """
-    { "a": 12, "b": "Hello", "arr": [1, 2, 3], "obj": { "nestedInt": 12, "nestedString": "str" } }
+    { "a": 12, "b": "Hello", "null": null, "arr": [1, 2, 3], "obj": { "nestedInt": 12, "nestedString": "str" } }
 """.data(using: .utf8)!
 
 if let jsonObject = try? JSONSerialization.jsonObject(with: json) as? [String: Any] {
     print(jsonObject, "\n")
+    print("typeof null", type(of: jsonObject["null"]))
+    let nullInst: Optional<Any> = jsonObject["null"]
+    if let val = nullInst {
+        print("TYPE VAL", type(of: val))
+        print("VAL", val)
+    } else {
+        print("VAL is nil")
+    }
     
     if let intArray = jsonObject["arr"] as? [Int] {
         print(intArray[0])
@@ -46,6 +54,8 @@ print("\n\ntrying object")
 let resultObject = runDecode("""
 {"intVal": 12, "stringVal": "Yo", "json": { "num": 12, "null": null, "nullArr": [1, null, { "a": "a", "null": null }], "str": "Hi", "dbl": 1.2, "arr": [1, 2, 3], "obj": { "int": 1, "o2": { "a": 88, "b": "b" } } } }
 """)
+
+print("\n", resultObject, "\n")
 
 if let map = resultObject?.json.value as? [String: Any] {
     print("got object")

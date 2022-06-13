@@ -23,7 +23,7 @@ public struct JSON: Codable {
     }
     public init(from decoder: Decoder) throws {
         if let container = try? decoder.container(keyedBy: JSONCodingKeys.self) {
-            self.value = decode(fromContainer: container)
+            self.value = decode(fromObject: container)
         } else if var array = try? decoder.unkeyedContainer() {
             self.value = decode(fromArray: &array)
         } else if let value = try? decoder.singleValueContainer() {
