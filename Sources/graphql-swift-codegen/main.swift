@@ -75,8 +75,13 @@ if let map = resultObject?.json.value as? [String: Any] {
     print(map["num"]!, map["dbl"]!)
     print("null", map["null"] ?? "<null>")
     print("nullArr", map["nullArr"]!)
-    
+
     let nullarr = map["nullArr"] as! [Any]
+    if let secondVal = nullarr[1] as Any? {
+        print("SECOND VAL", secondVal)
+    }
+    
+
     if let nullMap = nullarr[2] as? [String: Any] {
         print("null map", nullMap)
         
