@@ -6,6 +6,7 @@ for argument in CommandLine.arguments {
 }
 
 let graphqlUrl = "https://mylibrary.onrender.com/graphql"
+let junk: Dictionary<String, Any> = [:]
 
 struct ThingWithJson: Codable {
     let intVal: Int

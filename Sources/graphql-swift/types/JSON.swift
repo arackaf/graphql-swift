@@ -30,7 +30,10 @@ public struct JSON: Codable {
             if value.decodeNil() {
                 self.value = nil
             } else {
-                self.value = decode(fromSingleValue: value)
+                if let result = try? value.decode(Int.self) { self.value = result }
+                if let result = try? value.decode(Double.self) { self.value = result }
+                if let result = try? value.decode(String.self) { self.value = result }
+                if let result = try? value.decode(Bool.self) { self.value = result }
             }
         }
     }

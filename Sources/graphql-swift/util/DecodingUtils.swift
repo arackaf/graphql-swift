@@ -1,14 +1,5 @@
 import Foundation
 
-func decode(fromSingleValue container: SingleValueDecodingContainer) -> Any {
-    if let result = try? container.decode(Int.self) { return result }
-    if let result = try? container.decode(Double.self) { return result }
-    if let result = try? container.decode(String.self) { return result }
-    if let result = try? container.decode(Bool.self) { return result }
-
-    return Optional<Any>(nil) as Any
-}
-
 func decode(fromObject container: KeyedDecodingContainer<JSONCodingKeys>) -> [String: Any] {
     var result: [String: Any] = [:]
 
