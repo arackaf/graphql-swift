@@ -21,12 +21,25 @@ func runDecode(_ json: String) -> ThingWithJson? {
 }
 
 
+let testing: Optional<Any> = Optional<Any>(nil) as Any
+
+if let testVal = testing {
+    print("TESTING HAS VALUE", testVal)
+} else {
+    print("TESTING NOOOOO VALUE")
+}
+
 let json = """
     { "a": 12, "b": "Hello", "null": null, "arr": [1, 2, 3], "obj": { "nestedInt": 12, "nestedString": "str" } }
 """.data(using: .utf8)!
 
 if let jsonObject = try? JSONSerialization.jsonObject(with: json) as? [String: Any] {
     print(jsonObject, "\n")
+    
+    if let hasValue = jsonObject["null"] {
+        print("HAS VALUE", hasValue)
+    }
+    
     print("typeof null", type(of: jsonObject["null"]))
     let nullInst: Optional<Any> = jsonObject["null"]
     if let val = nullInst {
@@ -64,7 +77,7 @@ if let map = resultObject?.json.value as? [String: Any] {
     print("nullArr", map["nullArr"]!)
     
     let nullarr = map["nullArr"] as! [Any]
-    if let nullMap = nullarr[2] as? [String: Any?] {
+    if let nullMap = nullarr[2] as? [String: Any] {
         print("null map", nullMap)
         
         print("Keys")

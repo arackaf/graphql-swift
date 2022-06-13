@@ -32,10 +32,10 @@ public struct JSON: Codable {
     }
     
     public func encode(to encoder: Encoder) throws {
-        if let map = self.value as? [String: Any?] {
+        if let map = self.value as? [String: Any] {
             var container = encoder.container(keyedBy: JSONCodingKeys.self)
             encodeValue(fromObjectContainer: &container, map: map)
-        } else if let arr = self.value as? [Any?] {
+        } else if let arr = self.value as? [Any] {
             var container = encoder.unkeyedContainer()
             encodeValue(fromArrayContainer: &container, arr: arr)
         } else {

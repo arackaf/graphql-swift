@@ -6,11 +6,11 @@ func decode(fromSingleValue container: SingleValueDecodingContainer) -> Any {
     if let result = try? container.decode(String.self) { return result }
     if let result = try? container.decode(Bool.self) { return result }
     
-    return Optional<Any>(nil)
+    return Optional<Any>(nil) as Any
 }
 
 func decode(fromObject container: KeyedDecodingContainer<JSONCodingKeys>) -> [String: Any] {
-    var result: [String: Any?] = [:]
+    var result: [String: Any] = [:]
 
     for key in container.allKeys {
         if let val = try? container.decode(Int.self, forKey: key) { result[key.stringValue] = val }
@@ -23,7 +23,7 @@ func decode(fromObject container: KeyedDecodingContainer<JSONCodingKeys>) -> [St
         else if var nestedArray = try? container.nestedUnkeyedContainer(forKey: key) {
             result[key.stringValue] = decode(fromArray: &nestedArray)
         } else if (try? container.decodeNil(forKey: key)) == true  {
-            result[key.stringValue] = Optional<Any>(nil)
+            result.updateValue(Optional<Any>(nil) as Any, forKey: key.stringValue)
         }
     }
     
@@ -31,7 +31,7 @@ func decode(fromObject container: KeyedDecodingContainer<JSONCodingKeys>) -> [St
 }
 
 func decode(fromArray container: inout UnkeyedDecodingContainer) -> [Any] {
-    var result: [Any?] = []
+    var result: [Any] = []
 
     while container.isAtEnd == false {
         if let value = try? container.decode(String.self) { result.append(value) }
@@ -44,7 +44,7 @@ func decode(fromArray container: inout UnkeyedDecodingContainer) -> [Any] {
         else if var nestedArray = try? container.nestedUnkeyedContainer() {
             result.append(decode(fromArray: &nestedArray))
         } else if (try? container.decodeNil()) == true {
-            result.append(Optional<Any>(nil))
+            result.append(Optional<Any>(nil) as Any)
         }
     }
     
