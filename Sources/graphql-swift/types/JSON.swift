@@ -47,7 +47,18 @@ public struct JSON: Codable {
             encodeValue(fromArrayContainer: &container, arr: arr)
         } else {
             var container = encoder.singleValueContainer()
-            encodeValue(fromSingleValueContainer: &container, value: self.value)
+            
+            if let value = self.value as? String {
+                try? container.encode(value)
+            } else if let value = self.value as? Int {
+                try? container.encode(value)
+            } else if let value = self.value as? Double {
+                try? container.encode(value)
+            } else if let value = self.value as? Bool {
+                try? container.encode(value)
+            } else {
+                try? container.encodeNil()
+            }
         }
     }
 }

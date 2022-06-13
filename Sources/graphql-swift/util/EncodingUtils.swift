@@ -1,19 +1,5 @@
 import Foundation
 
-func encodeValue(fromSingleValueContainer container: inout SingleValueEncodingContainer, value: Any?) {
-    if let value = value as? String {
-        try? container.encode(value)
-    } else if let value = value as? Int {
-        try? container.encode(value)
-    } else if let value = value as? Double {
-        try? container.encode(value)
-    } else if let value = value as? Bool {
-        try? container.encode(value)
-    } else {
-        try? container.encodeNil()
-    }
-}
-
 func encodeValue(fromObjectContainer container: inout KeyedEncodingContainer<JSONCodingKeys>, map: [String:Any?]) {
     for k in map.keys {
         let value = map[k]
