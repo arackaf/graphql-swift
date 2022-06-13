@@ -27,7 +27,11 @@ public struct JSON: Codable {
         } else if var array = try? decoder.unkeyedContainer() {
             self.value = decode(fromArray: &array)
         } else if let value = try? decoder.singleValueContainer() {
-            self.value = decode(fromSingleValue: value)
+            if value.decodeNil() {
+                self.value = nil
+            } else {
+                self.value = decode(fromSingleValue: value)
+            }
         }
     }
     

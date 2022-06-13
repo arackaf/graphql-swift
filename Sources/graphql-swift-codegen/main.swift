@@ -132,6 +132,12 @@ let resultNull = runDecode("""
 
 print(resultNull, "\n\n")
 
+if let valResultNull = resultNull?.json.value {
+    print("HAS RESULT NULL", valResultNull)
+} else {
+    print("NO RESULT NULL")
+}
+
 func runEncode(_ movie: ThingWithJson) {
     let encoder = JSONEncoder()
     if let result = try? encoder.encode(movie) {
