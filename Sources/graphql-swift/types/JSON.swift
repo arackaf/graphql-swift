@@ -15,24 +15,11 @@ public struct JSONCodingKeys: CodingKey {
     }
 }
 
-func containerValue(from container: KeyedDecodingContainer<JSONCodingKeys>, key: JSONCodingKeys) -> Any? {
-    if let result = try? container.decode(Int.self, forKey: key) { return result }
-    if let result = try? container.decode(Double.self, forKey: key) { return result }
-    if let result = try? container.decode(String.self, forKey: key) { return result }
-    if let nestedContainer = try? container.nestedContainer(keyedBy: JSONCodingKeys.self, forKey: key) {
-        return decode(fromContainer: nestedContainer)
-    }
-    if var nestedArray = try? container.nestedUnkeyedContainer(forKey: key) {
-        return decode(fromArray: &nestedArray)
-    }
-    
-    return nil
-}
-
 func decode(fromSingleValue container: SingleValueDecodingContainer) -> Any? {
     if let result = try? container.decode(Int.self) { return result }
     if let result = try? container.decode(Double.self) { return result }
     if let result = try? container.decode(String.self) { return result }
+    if let result = try? container.decode(Bool.self) { return result }
     
     return nil
 }
@@ -41,7 +28,18 @@ func decode(fromContainer container: KeyedDecodingContainer<JSONCodingKeys>) -> 
     var result: [String: Any] = [:]
     
     for key in container.allKeys {
-        result[key.stringValue] = containerValue(from: container, key: key)
+        if let val = try? container.decode(Int.self, forKey: key) { result[key.stringValue] = val }
+        else if let val = try? container.decode(Double.self, forKey: key) { result[key.stringValue] = val }
+        else if let val = try? container.decode(String.self, forKey: key) { result[key.stringValue] = val }
+        else if let val = try? container.decode(Bool.self, forKey: key) { result[key.stringValue] = val }
+        else if let nestedContainer = try? container.nestedContainer(keyedBy: JSONCodingKeys.self, forKey: key) {
+            result[key.stringValue] = decode(fromContainer: nestedContainer)
+        }
+        else if var nestedArray = try? container.nestedUnkeyedContainer(forKey: key) {
+            result[key.stringValue] = decode(fromArray: &nestedArray)
+        } else {
+            result[key.stringValue] = nil
+        }
     }
     
     return result
@@ -54,15 +52,79 @@ func decode(fromArray container: inout UnkeyedDecodingContainer) -> [Any] {
         if let value = try? container.decode(String.self) { result.append(value) }
         else if let value = try? container.decode(Int.self) { result.append(value) }
         else if let value = try? container.decode(Double.self) { result.append(value) }
-        else if let value = try? container.nestedContainer(keyedBy: JSONCodingKeys.self) {
-            result.append(decode(fromContainer: value))
+        else if let value = try? container.decode(Bool.self) { result.append(value) }
+        else if let nestedContainer = try? container.nestedContainer(keyedBy: JSONCodingKeys.self) {
+            result.append(decode(fromContainer: nestedContainer))
         }
-        else if var value = try? container.nestedUnkeyedContainer() {
-            result.append(decode(fromArray: &value))
+        else if var nestedArray = try? container.nestedUnkeyedContainer() {
+            result.append(decode(fromArray: &nestedArray))
         }
     }
     
     return result
+}
+
+func encodeValue(fromSingleValueContainer container: inout SingleValueEncodingContainer, value: Any?) {
+    if let value = value as? String {
+        try? container.encode(value)
+    } else if let value = value as? Int {
+        try? container.encode(value)
+    } else if let value = value as? Double {
+        try? container.encode(value)
+    } else if let value = value as? Bool {
+        try? container.encode(value)
+    } else {
+        try? container.encodeNil()
+    }
+}
+
+func encodeValue(fromObjectContainer container: inout KeyedEncodingContainer<JSONCodingKeys>, map: [String:Any?]) {
+    for k in map.keys {
+        let value = map[k]
+        let encodingKey = JSONCodingKeys(stringValue: k)
+        
+        if let value = value as? String {
+            try? container.encode(value, forKey: encodingKey)
+        } else if let value = value as? Int {
+            try? container.encode(value, forKey: encodingKey)
+        } else if let value = value as? Double {
+            try? container.encode(value, forKey: encodingKey)
+        } else if let value = value as? Bool {
+            try? container.encode(value, forKey: encodingKey)
+        } else if let value = value as? [String: Any?] {
+            var keyedContainer = container.nestedContainer(keyedBy: JSONCodingKeys.self, forKey: encodingKey)
+            encodeValue(fromObjectContainer: &keyedContainer, map: value)
+        } else if let value = value as? [Any?] {
+            var unkeyedContainer = container.nestedUnkeyedContainer(forKey: encodingKey)
+            encodeValue(fromArrayContainer: &unkeyedContainer, arr: value)
+        } else {
+            try? container.encodeNil(forKey: encodingKey)
+        }
+        
+    }
+}
+
+func encodeValue(fromArrayContainer container: inout UnkeyedEncodingContainer, arr: [Any?]) {
+    for value in arr {
+        if let value = value as? String {
+            try? container.encode(value)
+        } else if let value = value as? Int {
+            try? container.encode(value)
+        } else if let value = value as? Double {
+            try? container.encode(value)
+        } else if let value = value as? Bool {
+            try? container.encode(value)
+        } else if let value = value as? [String: Any?] {
+            var keyedContainer = container.nestedContainer(keyedBy: JSONCodingKeys.self)
+            encodeValue(fromObjectContainer: &keyedContainer, map: value)
+        } else if let value = value as? [Any?] {
+            var unkeyedContainer = container.nestedUnkeyedContainer()
+            encodeValue(fromArrayContainer: &unkeyedContainer, arr: value)
+        } else {
+            try? container.encodeNil()
+        }
+        
+    }
 }
 
 public struct JSON: Codable {
@@ -79,11 +141,18 @@ public struct JSON: Codable {
         } else if let value = try? decoder.singleValueContainer() {
             self.value = decode(fromSingleValue: value)
         }
-        print(self.value ?? "nil")
     }
     
     public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode("Ayyyyyy")
+        if let map = self.value as? [String: Any?] {
+            var container = encoder.container(keyedBy: JSONCodingKeys.self)
+            encodeValue(fromObjectContainer: &container, map: map)
+        } else if let arr = self.value as? [Any?] {
+            var container = encoder.unkeyedContainer()
+            encodeValue(fromArrayContainer: &container, arr: arr)
+        } else {
+            var container = encoder.singleValueContainer()
+            encodeValue(fromSingleValueContainer: &container, value: self.value)
+        }
     }
 }

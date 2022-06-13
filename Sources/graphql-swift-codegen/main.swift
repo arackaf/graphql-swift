@@ -95,12 +95,19 @@ func runEncode(_ movie: ThingWithJson) {
     let encoder = JSONEncoder()
     if let result = try? encoder.encode(movie) {
         let json = String(data: result, encoding: .utf8)!
-        print(json)
+        print(json, "\n")
     }
 }
 
-let t = ThingWithJson(intVal: 12, stringVal: "Hello", json: JSON(value: "Yo"))
-runEncode(t)
+runEncode(ThingWithJson(intVal: 1, stringVal: "String - yo", json: JSON(value: "Yo")))
+
+runEncode(ThingWithJson(intVal: 2, stringVal: "Object / Map", json: JSON(value: ["a": 12, "b": "Hi"])))
+
+runEncode(ThingWithJson(intVal: 3, stringVal: "null", json: JSON(value: nil)))
+
+runEncode(ThingWithJson(intVal: 4, stringVal: "nested object", json: JSON(value: ["a": 12, "o": ["b": 2, "c": "hi"]])))
+
+runEncode(ThingWithJson(intVal: 5, stringVal: "array", json: JSON(value: [1, [2, [ "str": "string", "arr": ["a", ["b"]] ]], 3])))
 
 
 func run() async {
