@@ -44,12 +44,25 @@ print(resultInt?.json.value as? Int ?? "nil")
 
 print("\n\ntrying object")
 let resultObject = runDecode("""
-{"intVal": 12, "stringVal": "Yo", "json": { "num": 12, "str": "Hi", "dbl": 1.2, "arr": [1, 2, 3], "obj": { "int": 1, "o2": { "a": 88, "b": "b" } } } }
+{"intVal": 12, "stringVal": "Yo", "json": { "num": 12, "null": null, "nullArr": [1, null, { "a": "a", "null": null }], "str": "Hi", "dbl": 1.2, "arr": [1, 2, 3], "obj": { "int": 1, "o2": { "a": 88, "b": "b" } } } }
 """)
 
 if let map = resultObject?.json.value as? [String: Any] {
     print("got object")
     print(map["num"]!, map["dbl"]!)
+    print("null", map["null"] ?? "<null>")
+    print("nullArr", map["nullArr"]!)
+    
+    let nullarr = map["nullArr"] as! [Any]
+    if let nullMap = nullarr[2] as? [String: Any?] {
+        print("null map", nullMap)
+        
+        print("Keys")
+        for k in nullMap.keys {
+            print(k, nullMap[k])
+        }
+        print("End keys")
+    }
     
     if let nestedMap = map["obj"] as? [String: Any] {
         print("Got nested object")
