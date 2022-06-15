@@ -49,15 +49,15 @@ public struct JSON: Codable {
             var container = encoder.singleValueContainer()
             
             if let value = self.value as? String {
-                try? container.encode(value)
+                try! container.encode(value)
             } else if let value = self.value as? Int {
-                try? container.encode(value)
+                try! container.encode(value)
             } else if let value = self.value as? Double {
-                try? container.encode(value)
+                try! container.encode(value)
             } else if let value = self.value as? Bool {
-                try? container.encode(value)
+                try! container.encode(value)
             } else {
-                try? container.encodeNil()
+                try! container.encodeNil()
             }
         }
     }

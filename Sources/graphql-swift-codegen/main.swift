@@ -108,6 +108,8 @@ let resultArray = runDecode("""
 {"intVal": 12, "stringVal": "Yo", "json": ["a", "b", ["c"], { "i": 1, "arr": ["a", 1, [9, 8, 7, { "z": "z" }]] }, 1, 2, 3] }
 """)
 
+print("\n", resultArray, "\n")
+
 if let arr = resultArray?.json.value as? [Any] {
     print("got array")
     print(arr[0])

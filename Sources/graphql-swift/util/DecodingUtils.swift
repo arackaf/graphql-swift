@@ -24,7 +24,7 @@ func decode(fromObject container: KeyedDecodingContainer<JSONCodingKeys>) -> [St
 func decode(fromArray container: inout UnkeyedDecodingContainer) -> [Any] {
     var result: [Any] = []
 
-    while container.isAtEnd == false {
+    while !container.isAtEnd {
         if let value = try? container.decode(String.self) { result.append(value) }
         else if let value = try? container.decode(Int.self) { result.append(value) }
         else if let value = try? container.decode(Double.self) { result.append(value) }
