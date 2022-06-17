@@ -1,6 +1,6 @@
 import Foundation
 
-func encodeValue(fromObjectContainer container: inout KeyedEncodingContainer<JSONCodingKeys>, map: [String:Any?]) throws {
+func encodeValue(fromObjectContainer container: inout KeyedEncodingContainer<JSONCodingKeys>, map: [String:Any]) throws {
     for k in map.keys {
         let value = map[k]
         let encodingKey = JSONCodingKeys(stringValue: k)
@@ -25,7 +25,7 @@ func encodeValue(fromObjectContainer container: inout KeyedEncodingContainer<JSO
     }
 }
 
-func encodeValue(fromArrayContainer container: inout UnkeyedEncodingContainer, arr: [Any?]) throws {
+func encodeValue(fromArrayContainer container: inout UnkeyedEncodingContainer, arr: [Any]) throws {
     for value in arr {
         if let value = value as? String {
             try container.encode(value)

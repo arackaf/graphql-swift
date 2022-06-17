@@ -38,27 +38,27 @@ public struct JSON: Codable {
         }
     }
     
-    public func encode(to encoder: Encoder) throws {
-        if let map = self.value as? [String: Any] {
-            var container = encoder.container(keyedBy: JSONCodingKeys.self)
-            try encodeValue(fromObjectContainer: &container, map: map)
-        } else if let arr = self.value as? [Any] {
-            var container = encoder.unkeyedContainer()
-            try encodeValue(fromArrayContainer: &container, arr: arr)
-        } else {
-            var container = encoder.singleValueContainer()
-            
-            if let value = self.value as? String {
-                try! container.encode(value)
-            } else if let value = self.value as? Int {
-                try! container.encode(value)
-            } else if let value = self.value as? Double {
-                try! container.encode(value)
-            } else if let value = self.value as? Bool {
-                try! container.encode(value)
+        public func encode(to encoder: Encoder) throws {
+            if let map = self.value as? [String: Any] {
+                var container = encoder.container(keyedBy: JSONCodingKeys.self)
+                try encodeValue(fromObjectContainer: &container, map: map)
+            } else if let arr = self.value as? [Any] {
+                var container = encoder.unkeyedContainer()
+                try encodeValue(fromArrayContainer: &container, arr: arr)
             } else {
-                try! container.encodeNil()
+                var container = encoder.singleValueContainer()
+                
+                if let value = self.value as? String {
+                    try! container.encode(value)
+                } else if let value = self.value as? Int {
+                    try! container.encode(value)
+                } else if let value = self.value as? Double {
+                    try! container.encode(value)
+                } else if let value = self.value as? Bool {
+                    try! container.encode(value)
+                } else {
+                    try! container.encodeNil()
+                }
             }
         }
-    }
 }

@@ -157,7 +157,7 @@ runEncode(ThingWithJson(intVal: 3, stringVal: "null", json: JSON(value: nil)))
 
 runEncode(ThingWithJson(intVal: 4, stringVal: "nested object", json: JSON(value: ["a": 12, "o": ["b": 2, "c": "hi"]])))
 
-runEncode(ThingWithJson(intVal: 5, stringVal: "array", json: JSON(value: [1, [2, [ "str": "string", "arr": ["a", ["b"]] ]], 3])))
+runEncode(ThingWithJson(intVal: 5, stringVal: "array", json: JSON(value: [1, [2, nil, [ "str": "string", "nil": nil, "arr": ["a", ["b"]] ]], 3])))
 
 
 func run() async {
