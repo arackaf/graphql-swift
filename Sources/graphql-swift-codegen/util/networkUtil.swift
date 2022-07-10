@@ -9,8 +9,10 @@ enum NetworkRequestError: Error {
 }
 
 func networkRequest(_ request: URLRequest) async throws -> Data? {
+    let urlSession = URLSession(configuration: .ephemeral)
+    
     return try await withUnsafeThrowingContinuation { cont in
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        urlSession.dataTask(with: request) { data, response, error in
             if let error = error {
                 cont.resume(throwing: error)
                 return

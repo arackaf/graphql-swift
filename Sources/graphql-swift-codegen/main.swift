@@ -165,6 +165,9 @@ func run() async {
         print("calling networkRequest()")
         
         let client = GraphqlClient(endpoint: URL(string: graphqlUrl)!)
+        
+        await client.xyz()
+        
         let schemaGenerator = SchemaTypeGenerator(client: client)
         let inputTypesResponse = try await schemaGenerator.readInputTypes()
         let typesResponse = try await schemaGenerator.readTypes()
@@ -192,7 +195,7 @@ let myGroup = DispatchGroup()
 myGroup.enter()
 
 Task {
-    //await run()
+    await run()
     
     myGroup.leave() //// When your task completes
 }
