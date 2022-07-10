@@ -1,6 +1,6 @@
 import Foundation
 
-struct BookFilters : Encodable, Decodable {
+struct BookFilters : Codable {
     var isbn_contains: String?
     var isbn_startsWith: String?
     var isbn_endsWith: String?
@@ -93,16 +93,30 @@ struct BookFilters : Encodable, Decodable {
     var timestamp_lte: Float?
     var timestamp_gt: Float?
     var timestamp_gte: Float?
-    var timestamp: Float?
+    var timestamp: Float??
     var timestamp_ne: Float?
     var timestamp_in: Array<Float?>?
     var timestamp_nin: Array<Float?>?
     var OR: Array<BookFilters?>?
 }
 
-struct GenericGraphQLRequest : Codable {
+func hasVal<T: Equatable & Codable>(_ inst: BookFilters, _ name: KeyPath<BookFilters, Optional<T>>) -> Bool {
+    var s: String?
+    
+    if s == .none {
+        
+    }
+    
+    var xyz = inst[keyPath: name]
+
+    var val: T? = inst[keyPath: name]
+    return val != .none
+    //return true;
+}
+
+struct GenericGraphQLRequest<T: Codable> : Codable {
     let query: String
-    let variables: BookFilters
+    let variables: T
 }
 
 let bookQuery = """
@@ -165,6 +179,7 @@ open class GraphqlClient {
     public func xyz() async {
         var bf = BookFilters()
         bf.authors_containsAny = ["Richard Dawkins", "Steven Pinker"];
+        bf.timestamp = .some(nil)
         
         let requestBody = GenericGraphQLRequest(query: bookQuery, variables: bf);
         
@@ -176,6 +191,18 @@ open class GraphqlClient {
         print("\n\nYO\n\n")
         print(String(decoding: graphqlRequestPacket, as: UTF8.self))
 
+        print(hasVal(bf, \.timestamp))
+        print(hasVal(bf, \.authors_containsAny))
+        print(hasVal(bf, \.authors_in))
+        
+        let mirror = Mirror(reflecting: bf)
+        mirror.children.forEach { child in
+            print("Found child '\(child.label ?? "")' with value '\(child.value)'")
+        }
+        
+        
+        
+        return
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type") // the request is JSON
