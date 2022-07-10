@@ -135,13 +135,34 @@ query searchBooks(
 """
 
 struct Book: Codable {
-    var title: String
-    var isbn: String
-    var ean: String
+    let title: String
+    let isbn: String
+    let ean: String
+    
+    let junk: Int?
+}
+
+struct Books: Codable {
+    var Books: [Book];
 }
 
 struct BookResults: Codable {
-    let Books: [Book];
+    var allBooks: Books;
+}
+
+struct GQLResponse<T: Codable>: Codable {
+    var data: T
+}
+
+func decodeResponse<T: Decodable>(_ result: Data) throws -> T? {
+    let decoder = JSONDecoder()
+    
+    return try decoder.decode(T.self, from: result)
+}
+
+@resultBuilder
+struct GraphQLResultBuilder {
+    //static func buildBlock()
 }
 
 open class GraphqlClient {
@@ -195,26 +216,34 @@ open class GraphqlClient {
         print(hasVal(bf, \.authors_containsAny))
         print(hasVal(bf, \.authors_in))
         
-        let mirror = Mirror(reflecting: bf)
-        mirror.children.forEach { child in
-            print("Found child '\(child.label ?? "")' with value '\(child.value)'")
-        }
         
-        
-        
-        return
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type") // the request is JSON
         request.setValue("application/json", forHTTPHeaderField: "Accept") // the response expected to be in JSON format
         request.httpBody = graphqlRequestPacket
         
-        let result = try? await jsonRequest(request)
+        let result = try? await networkRequest(request)
         
+        let decoder = JSONDecoder()
+        if let result = result {
+            
+            if let bookResults: GQLResponse<BookResults> = try? decodeResponse(result) {
+                print("YAYAY")
+                
+                print(bookResults)
+            } else {
+                print("NYOPE")
+            }
+        }
         
+        /*
         if let result = result {
             print("\nBOOK QUERY\n\n")
             print(result)
+            
+            
+
             
             let foo = try? JSONSerialization.data(withJSONObject: result, options: .prettyPrinted)
             if let foo = foo {
@@ -231,5 +260,6 @@ open class GraphqlClient {
             print("\n\nERROR\n\n")
         }
         //return try? await run(request: request, produceResult)
+        */
     }
 }
