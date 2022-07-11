@@ -18,6 +18,14 @@ let graphqlSchemaInputTypesRequest = """
               ofType {
                 name
                 kind
+                ofType {
+                  name
+                  kind
+                  ofType {
+                    name
+                    kind
+                  }
+                }
               }
             }
           }
@@ -48,6 +56,14 @@ let graphqlSchemaTypesRequest = """
               ofType {
                 name
                 kind
+                ofType {
+                  name
+                  kind
+                  ofType {
+                    name
+                    kind
+                  }
+                }
               }
             }
           }
@@ -56,4 +72,71 @@ let graphqlSchemaTypesRequest = """
     }
   }
 }
+
+"""
+
+let graphqlSchemaQueriesRequest = """
+
+{
+  __schema {
+    queryType {
+      name
+      fields {
+        name
+        type {
+          name
+          kind
+          ofType {
+            name
+            kind
+            ofType {
+              name
+              kind
+              ofType {
+                name
+                kind
+                ofType{
+                  name
+                  kind
+                  ofType {
+                    name
+                    kind
+                  }
+                }
+              }
+            }
+          }
+        }
+        args {
+          name
+          type {
+            name
+            kind
+            ofType {
+              name
+              kind
+              ofType {
+                name
+                kind
+                ofType {
+                  name
+                  kind
+                  ofType{
+                    name
+                    kind
+                    ofType {
+                      name
+                      kind
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 """

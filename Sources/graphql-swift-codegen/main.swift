@@ -171,6 +171,7 @@ func run() async {
         let schemaGenerator = SchemaTypeGenerator(client: client)
         let inputTypesResponse = try await schemaGenerator.readInputTypes()
         let typesResponse = try await schemaGenerator.readTypes()
+        let queriesResponse = try await schemaGenerator.readQueries()
         let rootOutputUrl = URL(fileURLWithPath: "/Users/arackis/Documents/git/swift-codegen")
 
         let inputTypeGenerator = TypeGenerator();
@@ -185,6 +186,10 @@ func run() async {
             for type in typesResponse {
                 inputTypeGenerator.writeType(url: rootOutputUrl.appendingPathComponent("types"), type: type)
             }
+        }
+        
+        if let queriesResponse = queriesResponse {
+            inputTypeGenerator.writeQueries(url: rootOutputUrl.appendingPathComponent("queries"), queries: queriesResponse)
         }
     } catch {
         print("caught")

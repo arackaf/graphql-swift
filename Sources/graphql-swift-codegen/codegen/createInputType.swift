@@ -27,4 +27,20 @@ struct TypeGenerator {
             print("Caught error \(error)")
         }
     }
+    func writeQueries(url: URL, queries: [GraphqlQueryType]) {
+        let destination = url.appendingPathComponent("queries.swift");
+
+        let allQueries: [String] = queries.map { query in
+            let argsString = query.args.map{ $0.name + ": " + $0.type }.joined(separator: ", ")
+            
+            return "func \(query.name)(\(argsString)) -> \(query.returnType) {\n" + "}"
+        }
+
+        
+        do {
+            try allQueries.joined(separator: "\n\n").write(to: destination, atomically: true, encoding: String.Encoding.utf8)
+        } catch  {
+            print("Caught error \(error)")
+        }
+    }
 }
