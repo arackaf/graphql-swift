@@ -160,10 +160,6 @@ func decodeResponse<T: Decodable>(_ result: Data) throws -> T? {
     return try decoder.decode(T.self, from: result)
 }
 
-//@resultBuilder
-//struct GraphQLResultBuilder {
-    //static func buildBlock()
-//}
 
 open class GraphqlClient {
     let endpoint: URL

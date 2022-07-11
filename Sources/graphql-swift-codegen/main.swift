@@ -1,6 +1,64 @@
 import Foundation
 import graphql_swift
 
+protocol Lookup {
+    static var lookup: [PartialKeyPath<Self>:String] { get }
+}
+
+struct NestedType: Lookup {
+    let x: String
+    let y: Float
+    
+    static var lookup: [PartialKeyPath<NestedType>:String] = [\.x: "x", \.y: "y"]
+}
+
+func withNestedType(@GraphQLResultBuilder req: () -> String) -> String {
+    return req()
+}
+
+struct SomeType: Lookup {
+    let a: String
+    let b: Int
+    
+    static var lookup: [PartialKeyPath<SomeType>:String] = [\.a: "a", \.b: "b"]
+}
+
+@resultBuilder
+struct GraphQLResultBuilder {
+    static func buildBlock(_ kp: PartialKeyPath<SomeType>) -> String {
+        return SomeType.lookup[kp]!
+    }
+    
+    static func buildBlock(_ kps: PartialKeyPath<SomeType>...) -> String {
+        return kps.map({ SomeType.lookup[$0]! }).joined(separator: ", ")
+    }
+}
+
+func buildSomeTypeRequest(@GraphQLResultBuilder req: () -> String) -> String {
+    return req()
+}
+
+let reqString = buildSomeTypeRequest {
+    \SomeType.a
+    \SomeType.b
+}
+
+let pkp: PartialKeyPath<SomeType> = \.a
+
+//let reqString = buildSomeTypeRequest {
+//    \SomeType.a
+//    \SomeType.b
+//
+//    withNestedType {
+//        \NestedType.x
+//    }
+//}
+
+print("AAA", reqString)
+
+//print(build())
+
+
 for argument in CommandLine.arguments {
     print(argument)
 }
