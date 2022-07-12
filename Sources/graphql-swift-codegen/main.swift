@@ -12,35 +12,61 @@ struct NestedType: Lookup {
     static var lookup: [PartialKeyPath<NestedType>:String] = [\.x: "x", \.y: "y"]
 }
 
-func withNestedType(@GraphQLResultBuilder req: () -> String) -> String {
-    return req()
-}
+//let x: NestedType.F = .a
+
+//func withNestedType(@GraphQLResultBuilder req: () -> String) -> String {
+//    return req()
+//}
 
 struct SomeType: Lookup {
     let a: String
     let b: Int
+    let f: Float
     
-    static var lookup: [PartialKeyPath<SomeType>:String] = [\.a: "a", \.b: "b"]
+    enum fields: String {
+        case a = "a"
+        case b = "b"
+    }
+    static var lookup: [PartialKeyPath<SomeType>:String] = [\.a: "a", \.b: "b", \.f: "f"]
+}
+
+//func agf<T: String | Int>(_ val: T) {
+//
+//}
+
+struct FromKP<T> {
+    init(_ kp: PartialKeyPath<T>) {
+        
+    }
+    
+    init(_ kp: KeyPath<T, String>) {
+        
+    }
 }
 
 @resultBuilder
-struct GraphQLResultBuilder {
-    static func buildBlock(_ kp: PartialKeyPath<SomeType>) -> String {
-        return SomeType.lookup[kp]!
-    }
+struct GraphQLResultBuilder<T: Lookup> {
+//    static func buildBlock(_ kp: KeyPath<T, String>) -> String {
+//        return T.lookup[kp]!
+//    }
+//    static func buildBlock(_ kp: KeyPath<T, Int>) -> String {
+//        return T.lookup[kp]!
+//    }
     
-    static func buildBlock(_ kps: PartialKeyPath<SomeType>...) -> String {
-        return kps.map({ SomeType.lookup[$0]! }).joined(separator: ", ")
+    static func buildBlock(_ kps: FromKP<T>...) -> String {
+        return ""
+        //return kps.map({ T.lookup[$0] ?? "" }).joined(separator: ", ")
     }
 }
 
-func buildSomeTypeRequest(@GraphQLResultBuilder req: () -> String) -> String {
+func buildSomeTypeRequest(@GraphQLResultBuilder<SomeType> req: () -> String) -> String {
     return req()
 }
 
 let reqString = buildSomeTypeRequest {
     \SomeType.a
     \SomeType.b
+    //\SomeType.f
 }
 
 let pkp: PartialKeyPath<SomeType> = \.a
