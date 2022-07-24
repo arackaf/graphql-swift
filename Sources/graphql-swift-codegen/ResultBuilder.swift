@@ -73,6 +73,13 @@ final class BooksAndSubjectsResultBuilder : ResultBuilder {
     var genreResultFields: [GenreFields] = []
     var metadataResultFields: [BookFields] = []
     
+    func withBooks(_ fields: [BookFields], serializeInto: Codable.Type? = nil) {
+        if (serializeInto != nil) {
+            BookResultType = serializeInto!.self
+        }
+        bookResultFields = fields
+    }
+    
     func x() -> String {
         
         return """
@@ -89,6 +96,23 @@ final class BooksAndSubjectsResultBuilder : ResultBuilder {
     }
 }
 
-
-
 /* ------------------------------------------------ */
+
+// but I can write my own type with non-null fields for some queries
+struct BookSubType: Codable {
+    var id: String
+    var title: String
+    var authors: Array<String>
+}
+
+func junk2() {
+    let xxx = BooksAndSubjectsResultBuilder();
+
+    xxx.withBooks([.id, .title, .authors])
+    xxx.withBooks([.id, .title, .authors], serializeInto: BookSubType.self)
+}
+
+
+
+
+
