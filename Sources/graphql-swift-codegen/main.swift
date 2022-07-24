@@ -63,11 +63,11 @@ func buildSomeTypeRequest(@GraphQLResultBuilder<SomeType> req: () -> String) -> 
     return req()
 }
 
-let reqString = buildSomeTypeRequest {
-    \SomeType.a
-    \SomeType.b
-    //\SomeType.f
-}
+//let reqString = buildSomeTypeRequest {
+//    \SomeType.a
+//    \SomeType.b
+//    //\SomeType.f
+//}
 
 let pkp: PartialKeyPath<SomeType> = \.a
 
@@ -80,7 +80,7 @@ let pkp: PartialKeyPath<SomeType> = \.a
 //    }
 //}
 
-print("AAA", reqString)
+//print("AAA", reqString)
 
 //print(build())
 
@@ -89,7 +89,7 @@ for argument in CommandLine.arguments {
     print(argument)
 }
 
-let graphqlUrl = "https://mylibrary.onrender.com/graphql-public"
+let graphqlUrl = "https://mylibrary.onrender.com/graphql"
 let junk: Dictionary<String, Any> = [:]
 
 struct ThingWithJson: Codable {
