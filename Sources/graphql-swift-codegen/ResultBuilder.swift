@@ -3,20 +3,32 @@ import Foundation
 /* auto generated */
 /* ------------------------------------------------ */
 
-enum BookFields: String {
-    case id; case title; case isbn; case authors; case pages; case publicationDate; case genres;
+struct EditorialReview: Codable {
+    enum Fields: String { case source; case review; }
+    
+    var source: String?
+    var review: String?
 }
 
-enum GenreFields: String {
-    case id; case name;
+struct Reviewer: Codable {
+    enum Fields: String { case id; case name; case address; }
+    
+    var id: String?
+    var name: String?
+    var address: String?
 }
 
-enum QueryMetadataFields: String {
-    case queryExecutionTime; case memoryUsed;
+struct Review: Codable {
+    enum Fields: String { case reviewer; case stars; }
+    
+    var reviewer: Reviewer?
+    var stars: Float?
 }
 
 // everything's nullable since we don't know which fields the user will query
 struct BookFull: Codable {
+    enum Fields: String { case id; case title; case isbn; case authors; case pages; case publicationDate; case genres; }
+    
     var id: String?
     var title: String?
     var isbn: String?
@@ -24,22 +36,24 @@ struct BookFull: Codable {
     var pages: Int?
     var publicationDate: String?
     var genres: Array<String>?
+    var editorialReviews: Array<EditorialReview>?
+    var reviews: Array<Review>?
 }
 
 struct GenreFull: Codable {
+    enum Fields: String { case id; case name; }
+    
     var id: String?
     var name: String?
 }
 
-struct QueryMetadata: Codable {
+struct BooksAndSubjectsResult<TBooks: Codable, TSubjects: Codable>: Codable {
     var queryExecutionTime: Int?
     var memoryUsed: Int?
-}
-
-struct BooksAndSubjectsResult<TBooks: Codable, TSubjects: Codable, TMetadata: Codable>: Codable {
+    var queryComplexity: Int?
+    
     var Books: TBooks
     var Subjects: TSubjects
-    var MetaData: TMetadata
 }
 
 /**
@@ -54,8 +68,8 @@ struct BooksAndSubjectsResult<TBooks: Codable, TSubjects: Codable, TMetadata: Co
     from which we can query arbitrarily - ie select any sub-graph therefrom - ie the Graph in GraphQL
 */
 
-protocol x: RawRepresentable {
-    
+protocol GraphQLResultSegment {
+    func produce() -> String;
 }
 
 class ResultBuilder {
@@ -67,31 +81,18 @@ class ResultBuilder {
 final class BooksAndSubjectsResultBuilder : ResultBuilder {
     var BookResultType: Codable.Type = BookFull.self
     var GenreResultType: Codable.Type = GenreFull.self
-    var MetadataResultType: Codable.Type = QueryMetadata.self
     
-    var bookResultFields: [BookFields] = []
-    var genreResultFields: [GenreFields] = []
-    var metadataResultFields: [BookFields] = []
+    var bookResultFields: [BookFull.Fields] = []
+    var genreResultFields: [GenreFull.Fields] = []
     
-    func withBooks(_ fields: [BookFields], serializeInto: Codable.Type? = nil) {
+    func withBooks(_ fields: [BookFull.Fields], serializeInto: Codable.Type? = nil) {
         if (serializeInto != nil) {
             BookResultType = serializeInto!.self
         }
         bookResultFields = fields
     }
     
-    func x() -> String {
-        
-        return """
-            {
-                \(writeSelection("Books", bookResultFields))
-                \(writeSelection("Genres", genreResultFields))
-                \(writeSelection("Meta", metadataResultFields))
-            }
-        """
-    }
-    
-    func foo() -> BooksAndSubjectsResult<BookFull, BookFull, BookFull>? {
+    func foo() -> BooksAndSubjectsResult<BookFull, BookFull>? {
         return nil
     }
 }
