@@ -106,6 +106,7 @@ func runDecode(_ json: String) -> ThingWithJson? {
 }
 
 
+/*
 let testing: Optional<Any> = Optional<Any>(nil) as Any
 
 if let testVal = testing {
@@ -113,7 +114,9 @@ if let testVal = testing {
 } else {
     print("TESTING NOOOOO VALUE")
 }
+*/
 
+/*
 let json = """
     { "a": 12, "b": "Hello", "null": null, "arr": [1, 2, 3], "obj": { "nestedInt": 12, "nestedString": "str" } }
 """.data(using: .utf8)!
@@ -138,14 +141,16 @@ if let jsonObject = try? JSONSerialization.jsonObject(with: json) as? [String: A
         print(intArray[0])
     }
 }
+*/
 
-
-
+/*
 print("\n\ntrying Int")
 let resultInt = runDecode("""
 {"intVal": 12, "stringVal": "Yo", "json": 99 }
 """)
+*/
 
+/*
 print(resultInt?.json.value as? Int ?? "nil")
 
 print("\n\ntrying object")
@@ -154,7 +159,8 @@ let resultObject = runDecode("""
 """)
 
 print("\n", resultObject, "\n")
-
+*/
+/*
 if let map = resultObject?.json.value as? [String: Any] {
     print("got object")
     print(map["num"]!, map["dbl"]!)
@@ -243,6 +249,7 @@ runEncode(ThingWithJson(intVal: 4, stringVal: "nested object", json: JSON(value:
 
 runEncode(ThingWithJson(intVal: 5, stringVal: "array", json: JSON(value: [1, [2, nil, [ "str": "string", "nil": nil, "arr": ["a", ["b"]] ]], 3])))
 
+*/
 
 func run() async {
     do {
@@ -280,6 +287,7 @@ func run() async {
     }
 }
 
+/*
 let myGroup = DispatchGroup()
 myGroup.enter()
 
@@ -290,4 +298,52 @@ Task {
 }
 
 myGroup.wait()
+*/
 
+
+
+let decoder = JSONDecoder()
+
+struct Meta: Codable {
+    var queryTime: Int
+}
+
+struct BookAll: Codable {
+    var title: String?
+    var subtitle: String?
+    var authors: Array<String>?
+    var publisher: String?
+    var pages: Int?
+}
+
+struct BookPartial: Codable {
+    var title: String
+    var pages: Int
+}
+
+struct ResultsType: Codable {
+    var meta: Meta?
+    var books: Array<BookAll>?
+}
+
+struct ResultsTypeLimitedBook: Codable {
+    var meta: Meta
+    var books: Array<BookPartial>
+}
+
+let json = """
+
+{
+    "meta": { "queryTime": 12 },
+    "books": [{ "title": "Book 1", "pages": 100 },{ "title": "Book 2", "pages": 200 }]
+}
+
+"""
+
+let junk = ResultsType.meta;
+
+
+let data = json.data(using: .utf8)!
+let res1 = try? decoder.decode(ResultsTypeLimitedBook.self, from: data)
+
+print(res1)
