@@ -5,11 +5,20 @@ protocol Lookup {
     static var lookup: [PartialKeyPath<Self>:String] { get }
 }
 
-struct NestedType: Lookup {
+public struct NestedType: Lookup {
     let x: String
     let y: Float
     
     static var lookup: [PartialKeyPath<NestedType>:String] = [\.x: "x", \.y: "y"]
+}
+
+public struct Type1 {
+    public init(x: Int, y: Int) {
+        self.x = x
+        self.y = y
+    }
+    let x: Int
+    let y: Int
 }
 
 //let x: NestedType.F = .a
@@ -300,7 +309,7 @@ Task {
 myGroup.wait()
 */
 
-
+print("\n\nXXX\n\n")
 
 let decoder = JSONDecoder()
 
@@ -340,10 +349,10 @@ let json = """
 
 """
 
-let junk = ResultsType.meta;
+//let junk = type(of: ResultsType.meta);
 
 
 let data = json.data(using: .utf8)!
 let res1 = try? decoder.decode(ResultsTypeLimitedBook.self, from: data)
 
-print(res1)
+//print(res1)

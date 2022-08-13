@@ -1,5 +1,14 @@
 import Foundation
 
+public struct Type2 {
+    public init(x: Int, y: Int) {
+        self.x = x
+        self.y = y
+    }
+    let x: Int
+    let y: Int
+}
+
 public struct JSONCodingKeys: CodingKey {
     public var stringValue: String
     
