@@ -17,8 +17,8 @@ let package = Package(
             name: "test-namespace",
             targets: ["test-namespace"]),
         .executable(
-            name: "graphql-swift-codegen",
-            targets: ["graphql-swift-codegen"])
+            name: "local-run-codegen",
+            targets: ["local-run-codegen"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -34,7 +34,7 @@ let package = Package(
             name: "test-namespace",
             dependencies: []),
         .executableTarget(
-            name: "graphql-swift-codegen",
+            name: "local-run-codegen",
             dependencies: ["graphql-swift"]),
         .testTarget(
             name: "graphql-swiftTests",
