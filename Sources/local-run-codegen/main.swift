@@ -1,264 +1,8 @@
 import Foundation
 import graphql_swift
 
-protocol Lookup {
-    static var lookup: [PartialKeyPath<Self>:String] { get }
-}
-
-public struct NestedType: Lookup {
-    let x: String
-    let y: Float
-    
-    static var lookup: [PartialKeyPath<NestedType>:String] = [\.x: "x", \.y: "y"]
-}
-
-public struct Type1 {
-    public init(x: Int, y: Int) {
-        self.x = x
-        self.y = y
-    }
-    let x: Int
-    let y: Int
-}
-
-//let x: NestedType.F = .a
-
-//func withNestedType(@GraphQLResultBuilder req: () -> String) -> String {
-//    return req()
-//}
-
-struct SomeType: Lookup {
-    let a: String
-    let b: Int
-    let f: Float
-    
-    enum fields: String {
-        case a = "a"
-        case b = "b"
-    }
-    static var lookup: [PartialKeyPath<SomeType>:String] = [\.a: "a", \.b: "b", \.f: "f"]
-}
-
-//func agf<T: String | Int>(_ val: T) {
-//
-//}
-
-struct FromKP<T> {
-    init(_ kp: PartialKeyPath<T>) {
-        
-    }
-    
-    init(_ kp: KeyPath<T, String>) {
-        
-    }
-}
-
-@resultBuilder
-struct GraphQLResultBuilder<T: Lookup> {
-//    static func buildBlock(_ kp: KeyPath<T, String>) -> String {
-//        return T.lookup[kp]!
-//    }
-//    static func buildBlock(_ kp: KeyPath<T, Int>) -> String {
-//        return T.lookup[kp]!
-//    }
-    
-    static func buildBlock(_ kps: FromKP<T>...) -> String {
-        return ""
-        //return kps.map({ T.lookup[$0] ?? "" }).joined(separator: ", ")
-    }
-}
-
-func buildSomeTypeRequest(@GraphQLResultBuilder<SomeType> req: () -> String) -> String {
-    return req()
-}
-
-//let reqString = buildSomeTypeRequest {
-//    \SomeType.a
-//    \SomeType.b
-//    //\SomeType.f
-//}
-
-let pkp: PartialKeyPath<SomeType> = \.a
-
-//let reqString = buildSomeTypeRequest {
-//    \SomeType.a
-//    \SomeType.b
-//
-//    withNestedType {
-//        \NestedType.x
-//    }
-//}
-
-//print("AAA", reqString)
-
-//print(build())
-
-
-for argument in CommandLine.arguments {
-    print(argument)
-}
 
 let graphqlUrl = "https://mylibrary.onrender.com/graphql"
-let junk: Dictionary<String, Any> = [:]
-
-struct ThingWithJson: Codable {
-    let intVal: Int
-    let stringVal: String
-    let json: JSON
-}
-
-func runDecode(_ json: String) -> ThingWithJson? {
-  let decoder = JSONDecoder()
-  let data = json.data(using: .utf8)!
-
-  return try? decoder.decode(ThingWithJson.self, from: data)
-}
-
-
-/*
-let testing: Optional<Any> = Optional<Any>(nil) as Any
-
-if let testVal = testing {
-    print("TESTING HAS VALUE", testVal)
-} else {
-    print("TESTING NOOOOO VALUE")
-}
-*/
-
-/*
-let json = """
-    { "a": 12, "b": "Hello", "null": null, "arr": [1, 2, 3], "obj": { "nestedInt": 12, "nestedString": "str" } }
-""".data(using: .utf8)!
-
-if let jsonObject = try? JSONSerialization.jsonObject(with: json) as? [String: Any] {
-    print(jsonObject, "\n")
-    
-    if let hasValue = jsonObject["null"] {
-        print("HAS VALUE", hasValue)
-    }
-    
-    print("typeof null", type(of: jsonObject["null"]))
-    let nullInst: Optional<Any> = jsonObject["null"]
-    if let val = nullInst {
-        print("TYPE VAL", type(of: val))
-        print("VAL", val)
-    } else {
-        print("VAL is nil")
-    }
-    
-    if let intArray = jsonObject["arr"] as? [Int] {
-        print(intArray[0])
-    }
-}
-*/
-
-/*
-print("\n\ntrying Int")
-let resultInt = runDecode("""
-{"intVal": 12, "stringVal": "Yo", "json": 99 }
-""")
-*/
-
-/*
-print(resultInt?.json.value as? Int ?? "nil")
-
-print("\n\ntrying object")
-let resultObject = runDecode("""
-{"intVal": 12, "stringVal": "Yo", "json": { "num": 12, "null": null, "nullArr": [1, null, { "a": "a", "null": null }], "str": "Hi", "dbl": 1.2, "arr": [1, 2, 3], "obj": { "int": 1, "o2": { "a": 88, "b": "b" } } } }
-""")
-
-print("\n", resultObject, "\n")
-*/
-/*
-if let map = resultObject?.json.value as? [String: Any] {
-    print("got object")
-    print(map["num"]!, map["dbl"]!)
-    print("null", map["null"] ?? "<null>")
-    print("nullArr", map["nullArr"]!)
-
-    let nullarr = map["nullArr"] as! [Any]
-    if let secondVal = nullarr[1] as Any? {
-        print("SECOND VAL", secondVal)
-    }
-    
-
-    if let nullMap = nullarr[2] as? [String: Any] {
-        print("null map", nullMap)
-        
-        print("Keys")
-        for k in nullMap.keys {
-            print(k, nullMap[k])
-        }
-        print("End keys")
-    }
-    
-    if let nestedMap = map["obj"] as? [String: Any] {
-        print("Got nested object")
-        print(nestedMap["int"]!)
-        if let nestedMap2 = nestedMap["o2"] as? [String: Any] {
-            print("Got nested object 2")
-            print(nestedMap2["a"]!)
-        }
-    }
-}
-
-print("\n\ntrying array")
-let resultArray = runDecode("""
-{"intVal": 12, "stringVal": "Yo", "json": ["a", "b", ["c"], { "i": 1, "arr": ["a", 1, [9, 8, 7, { "z": "z" }]] }, 1, 2, 3] }
-""")
-
-print("\n", resultArray, "\n")
-
-if let arr = resultArray?.json.value as? [Any] {
-    print("got array")
-    print(arr[0])
-    print(arr[1])
-    print(arr[2])
-    print(arr[3])
-    
-    if let nestedObj = arr[3] as? [String: Any] {
-        print("nested object")
-        print(nestedObj["i"]!)
-        
-        if let nestedArr2 = nestedObj["arr"] as? [Any] {
-            print("nested arr2")
-            print(nestedArr2[0])
-        }
-    }
-}
-
-print("\n\ntrying null")
-let resultNull = runDecode("""
-{"intVal": 12, "stringVal": "Yo", "json": null }
-""")
-
-print(resultNull, "\n\n")
-
-if let valResultNull = resultNull?.json.value {
-    print("HAS RESULT NULL", valResultNull)
-} else {
-    print("NO RESULT NULL")
-}
-
-func runEncode(_ movie: ThingWithJson) {
-    let encoder = JSONEncoder()
-    if let result = try? encoder.encode(movie) {
-        let json = String(data: result, encoding: .utf8)!
-        print(json, "\n")
-    }
-}
-
-runEncode(ThingWithJson(intVal: 1, stringVal: "String - yo", json: JSON(value: "Yo")))
-
-runEncode(ThingWithJson(intVal: 2, stringVal: "Object / Map", json: JSON(value: ["a": 12, "b": "Hi"])))
-
-runEncode(ThingWithJson(intVal: 3, stringVal: "null", json: JSON(value: nil)))
-
-runEncode(ThingWithJson(intVal: 4, stringVal: "nested object", json: JSON(value: ["a": 12, "o": ["b": 2, "c": "hi"]])))
-
-runEncode(ThingWithJson(intVal: 5, stringVal: "array", json: JSON(value: [1, [2, nil, [ "str": "string", "nil": nil, "arr": ["a", ["b"]] ]], 3])))
-
-*/
 
 func run() async {
     do {
@@ -295,8 +39,6 @@ func run() async {
         print("caught")
     }
 }
-
-/*
 let myGroup = DispatchGroup()
 myGroup.enter()
 
@@ -306,53 +48,115 @@ Task {
     myGroup.leave() //// When your task completes
 }
 
-myGroup.wait()
-*/
+//myGroup.wait()
 
-print("\n\nXXX\n\n")
 
-let decoder = JSONDecoder()
-
-struct Meta: Codable {
-    var queryTime: Int
-}
-
-struct BookAll: Codable {
+struct BookFilters : Codable {
+    var isbn_contains: String?
+    var isbn_startsWith: String?
+    var isbn_endsWith: String?
+    var isbn_regex: String?
+    var isbn: String?
+    var isbn_ne: String?
+    var isbn_in: Array<String?>?
+    var isbn_nin: Array<String?>?
+    var title_contains: String?
+    var title_startsWith: String?
+    var title_endsWith: String?
+    var title_regex: String?
     var title: String?
-    var subtitle: String?
-    var authors: Array<String>?
+    var title_ne: String?
+    var title_in: Array<String?>?
+    var title_nin: Array<String?>?
+    var userId_contains: String?
+    var userId_startsWith: String?
+    var userId_endsWith: String?
+    var userId_regex: String?
+    var userId: String?
+    var userId_ne: String?
+    var userId_in: Array<String?>?
+    var userId_nin: Array<String?>?
+    var publisher_contains: String?
+    var publisher_startsWith: String?
+    var publisher_endsWith: String?
+    var publisher_regex: String?
     var publisher: String?
+    var publisher_ne: String?
+    var publisher_in: Array<String?>?
+    var publisher_nin: Array<String?>?
+    var pages_lt: Int?
+    var pages_lte: Int?
+    var pages_gt: Int?
+    var pages_gte: Int?
     var pages: Int?
+    var pages_ne: Int?
+    var pages_in: Array<Int?>?
+    var pages_nin: Array<Int?>?
+    var authors_count: Int?
+    var authors_textContains: String?
+    var authors_startsWith: String?
+    var authors_endsWith: String?
+    var authors_regex: String?
+    var authors: Array<String?>?
+    var authors_in: Array<Array<String?>?>?
+    var authors_nin: Array<Array<String?>?>?
+    var authors_contains: String?
+    var authors_containsAny: Array<String?>?
+    var authors_containsAll: Array<String?>?
+    var authors_ne: Array<String?>?
+    var subjects_count: Int?
+    var subjects_textContains: String?
+    var subjects_startsWith: String?
+    var subjects_endsWith: String?
+    var subjects_regex: String?
+    var subjects: Array<String?>?
+    var subjects_in: Array<Array<String?>?>?
+    var subjects_nin: Array<Array<String?>?>?
+    var subjects_contains: String?
+    var subjects_containsAny: Array<String?>?
+    var subjects_containsAll: Array<String?>?
+    var subjects_ne: Array<String?>?
+    var tags_count: Int?
+    var tags_textContains: String?
+    var tags_startsWith: String?
+    var tags_endsWith: String?
+    var tags_regex: String?
+    var tags: Array<String?>?
+    var tags_in: Array<Array<String?>?>?
+    var tags_nin: Array<Array<String?>?>?
+    var tags_contains: String?
+    var tags_containsAny: Array<String?>?
+    var tags_containsAll: Array<String?>?
+    var tags_ne: Array<String?>?
+    var isRead: Bool?
+    var isRead_ne: Bool?
+    var isRead_in: Array<Bool?>?
+    var isRead_nin: Array<Bool?>?
+    var dateAdded_contains: String?
+    var dateAdded_startsWith: String?
+    var dateAdded_endsWith: String?
+    var dateAdded_regex: String?
+    var dateAdded: String?
+    var dateAdded_ne: String?
+    var dateAdded_in: Array<String?>?
+    var dateAdded_nin: Array<String?>?
+    var timestamp_lt: Float?
+    var timestamp_lte: Float?
+    var timestamp_gt: Float?
+    var timestamp_gte: Float?
+    var timestamp: Float??
+    var timestamp_ne: Float?
+    var timestamp_in: Array<Float?>?
+    var timestamp_nin: Array<Float?>?
+    var OR: Array<BookFilters?>?
 }
 
-struct BookPartial: Codable {
-    var title: String
-    var pages: Int
-}
+var filters = BookFilters()
 
-struct ResultsType: Codable {
-    var meta: Meta?
-    var books: Array<BookAll>?
-}
+filters.pages_in = [1, 2, 3]
 
-struct ResultsTypeLimitedBook: Codable {
-    var meta: Meta
-    var books: Array<BookPartial>
-}
+let encodedData = try JSONEncoder().encode(filters)
+let jsonString = String(data: encodedData, encoding: .utf8)
 
-let json = """
-
-{
-    "meta": { "queryTime": 12 },
-    "books": [{ "title": "Book 1", "pages": 100 },{ "title": "Book 2", "pages": 200 }]
-}
-
-"""
-
-//let junk = type(of: ResultsType.meta);
-
-
-let data = json.data(using: .utf8)!
-let res1 = try? decoder.decode(ResultsTypeLimitedBook.self, from: data)
-
-//print(res1)
+print("Value:")
+print("Value" + jsonString!)
