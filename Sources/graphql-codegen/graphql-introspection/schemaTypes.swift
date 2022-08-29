@@ -1,14 +1,14 @@
 import Foundation
 
-func getType(_ json: [String: Any], nullable: Bool = true) -> String {
+func getSwiftType(_ json: [String: Any], nullable: Bool = true) -> String {
     let kind: String? = json.get("kind")
     let modifier: String = nullable ? "?" : ""
     
     if kind == "LIST" {
-        let nestedType = getType(json.object("ofType")!)
+        let nestedType = getSwiftType(json.object("ofType")!)
         return "Array<\(nestedType)>\(modifier)"
     } else if kind == "NON_NULL"{
-        return getType(json.object("ofType")!, nullable: false)
+        return getSwiftType(json.object("ofType")!, nullable: false)
     } else {
         var name: String? = json.get("name")
         if name == "Boolean" {
@@ -18,18 +18,39 @@ func getType(_ json: [String: Any], nullable: Bool = true) -> String {
         if let name = name {
             return name + modifier
         }
-        return getType(json.object("ofType")!, nullable: nullable)
+        return getSwiftType(json.object("ofType")!, nullable: nullable)
+    }
+}
+
+func getGraphqlType(_ json: [String: Any], nullable: Bool = true) -> String {
+    let kind: String? = json.get("kind")
+    let modifier: String = nullable ? "" : "!"
+    
+    if kind == "LIST" {
+        let nestedType = getGraphqlType(json.object("ofType")!)
+        return "[\(nestedType)]\(modifier)"
+    } else if kind == "NON_NULL"{
+        return getGraphqlType(json.object("ofType")!, nullable: false)
+    } else {
+        let name: String? = json.get("name")
+        
+        if let name = name {
+            return name + modifier
+        }
+        return getGraphqlType(json.object("ofType")!, nullable: nullable)
     }
 }
 
 public struct GraphqlIdentifier: InitializableFromJSON {
     public let name: String
-    public let type: String
+    public let swiftType: String
+    public let graphqlType: String
     
     init(json: [String: Any]){
         name = json.get("name")!
         let typeField = json.object("type")!
-        type = getType(typeField)
+        swiftType = getSwiftType(typeField)
+        graphqlType = getGraphqlType(typeField)
     }
 }
 
@@ -62,7 +83,7 @@ public struct GraphqlQueryType: InitializableFromJSON {
         name = json.get("name")!
         
         let typeField = json.object("type")!
-        returnType = getType(typeField)
+        returnType = getSwiftType(typeField)
         
         args = json.array("args")?.produce() ?? []
     }

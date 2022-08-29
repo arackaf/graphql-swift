@@ -4,26 +4,42 @@ let TAB = "    "
 let MAX_ARGS = 5
 
 func printField(_ identifier: GraphqlIdentifier) -> String {
-    return "var \(identifier.name): \(identifier.type)"
+    return "var \(identifier.name): \(identifier.swiftType)"
 }
 func printArg(_ identifier: GraphqlIdentifier) -> String {
-    return "\(identifier.name): \(identifier.type)"
+    return "\(identifier.name): \(identifier.swiftType)"
+}
+func printGraphqlArg(_ identifier: GraphqlIdentifier) -> String {
+    return "\(identifier.name): \(identifier.graphqlType)"
 }
 
 func printStructFields(_ identifiers: [GraphqlIdentifier]) -> String {
     return identifiers.map(printField).joined(separator: TAB + "\n")
 }
 
-func printFunctionArgs(_ args: [GraphqlIdentifier], printEmptyArgsAs: String = "()") -> String {
+func printFunctionArgs(_ args: [GraphqlIdentifier]) -> String {
     guard !args.isEmpty else {
-        return printEmptyArgsAs
+        return "()"
     }
     let allArgs = args.map(printArg)
     
     if args.count > MAX_ARGS {
-        return "(\n\(TAB)\(allArgs.joined(separator: "\n" + TAB))\n)"
+        return "(\n\(TAB)\(allArgs.joined(separator: ",\n" + TAB))\n)"
     } else {
-        return "(\(allArgs.joined(separator: " ")))"
+        return "(\(allArgs.joined(separator: ", ")))"
+    }
+}
+
+func printGraphqlArgs(_ args: [GraphqlIdentifier]) -> String {
+    guard !args.isEmpty else {
+        return ""
+    }
+    let allArgs = args.map(printGraphqlArg)
+    
+    if args.count > MAX_ARGS {
+        return "(\n\(TAB)\(allArgs.joined(separator: ",\n" + TAB))\n)"
+    } else {
+        return "(\(allArgs.joined(separator: ", ")))"
     }
 }
 
@@ -51,12 +67,11 @@ struct TypeGenerator {
     func writeQuery(url: URL, query: GraphqlQueryType) {
         let destination = url.appendingPathComponent("\(query.name).swift")
         
-        let argsString = query.args.map(printArg).joined(separator: ",\n")
         let funcDefinition = "func \(query.name)\(printFunctionArgs(query.args)) -> \(query.returnType) {\n" + "}"
         
         let queryText = """
 let queryText = \"\"\"
-query \(query.name) \(printFunctionArgs(query.args, printEmptyArgsAs: "")){
+query \(query.name) \(printGraphqlArgs(query.args)){
 
 }
 \"\"\"
