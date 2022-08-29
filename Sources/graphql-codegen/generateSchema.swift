@@ -37,7 +37,9 @@ public func generateSchema(fromEndpoint: URL, generateTo: String) async throws {
     }
     
     if let queriesResponse = queriesResponse {
-        typeGenerator.writeQueries(url: queriesPath, queries: queriesResponse)
+        for query in queriesResponse {
+            typeGenerator.writeQuery(url: queriesPath, query: query)
+        }
     }
 }
 
