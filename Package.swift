@@ -18,7 +18,7 @@ let package = Package(
             targets: ["graphql-codegen"]),
         .executable(
             name: "local-run-codegen",
-            targets: ["local-run-codegen"])
+            targets: ["local-run-codegen", "graphql-codegen"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -35,7 +35,7 @@ let package = Package(
             dependencies: []),
         .executableTarget(
             name: "local-run-codegen",
-            dependencies: ["graphql-swift"]),
+            dependencies: ["graphql-swift", "graphql-codegen"]),
         .testTarget(
             name: "graphql-swiftTests",
             dependencies: ["graphql-swift"]),
