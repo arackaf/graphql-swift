@@ -3,25 +3,15 @@ import Foundation
 let TAB = "    "
 let MAX_ARGS = 5
 
-func printField(_ identifier: GraphqlIdentifier) -> String {
-    return "var \(identifier.name): \(identifier.swiftType)"
-}
-func printArg(_ identifier: GraphqlIdentifier) -> String {
-    return "\(identifier.name): \(identifier.swiftType)"
-}
-func printGraphqlArg(_ identifier: GraphqlIdentifier) -> String {
-    return "\(identifier.name): \(identifier.graphqlType)"
-}
-
 func printStructFields(_ identifiers: [GraphqlIdentifier]) -> String {
-    return identifiers.map(printField).joined(separator: TAB + "\n")
+    return identifiers.map({ "var \($0.name): \($0.swiftType)" }).joined(separator: TAB + "\n")
 }
 
 func printFunctionArgs(_ args: [GraphqlIdentifier]) -> String {
     guard !args.isEmpty else {
         return "()"
     }
-    let allArgs = args.map(printArg)
+    let allArgs = args.map({ "\($0.name): \($0.swiftType)" })
     
     if args.count > MAX_ARGS {
         return "(\n\(TAB)\(allArgs.joined(separator: ",\n" + TAB))\n)"
@@ -34,7 +24,7 @@ func printGraphqlArgs(_ args: [GraphqlIdentifier]) -> String {
     guard !args.isEmpty else {
         return ""
     }
-    let allArgs = args.map(printGraphqlArg)
+    let allArgs = args.map({ "$\($0.name): \($0.graphqlType)" })
     
     if args.count > MAX_ARGS {
         return "(\n\(TAB)\(allArgs.joined(separator: ",\n" + TAB))\n)"
