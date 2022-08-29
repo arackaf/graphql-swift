@@ -1,6 +1,7 @@
 import Foundation
 
-let TAB = "    "
+let GQL_TAB = "  "
+let TAB = "  "
 let MAX_ARGS = 5
 
 func printStructFields(_ identifiers: [GraphqlIdentifier]) -> String {
@@ -11,7 +12,7 @@ func printFunctionArgs(_ args: [GraphqlIdentifier]) -> String {
     guard !args.isEmpty else {
         return "()"
     }
-    let allArgs = args.map({ "\($0.name): \($0.swiftType)" })
+    let allArgs = args.map { "\($0.name): \($0.swiftType)" }
     
     if args.count > MAX_ARGS {
         return "(\n\(TAB)\(allArgs.joined(separator: ",\n" + TAB))\n)"
@@ -24,10 +25,10 @@ func printGraphqlArgs(_ args: [GraphqlIdentifier]) -> String {
     guard !args.isEmpty else {
         return ""
     }
-    let allArgs = args.map({ "$\($0.name): \($0.graphqlType)" })
+    let allArgs = args.map { "$\($0.name): \($0.graphqlType)" }
     
     if args.count > MAX_ARGS {
-        return "(\n\(TAB)\(allArgs.joined(separator: ",\n" + TAB))\n)"
+        return "(\n\(GQL_TAB)\(allArgs.joined(separator: ",\n" + GQL_TAB))\n)"
     } else {
         return "(\(allArgs.joined(separator: ", ")))"
     }
@@ -62,7 +63,7 @@ struct TypeGenerator {
         let queryText = """
 let queryText = \"\"\"
 query \(query.name) \(printGraphqlArgs(query.args)){
-
+\(GQL_TAB)\(GQL_TAB)\(query.args.map{ "\($0.name): $\($0.name)" }.joined(separator: "\n" + GQL_TAB + GQL_TAB))
 }
 \"\"\"
 """
