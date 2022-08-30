@@ -9,7 +9,8 @@ func run() async {
     do {
         print("calling networkRequest()")
 
-        try await generateSchema(fromEndpoint: URL(string: graphqlUrl)!, generateTo: "/Users/arackis/Documents/git/swift-codegen");
+        //try await generateSchema(fromEndpoint: URL(string: graphqlUrl)!, generateTo: "/Users/arackis/Documents/git/swift-codegen");
+        try await generateSchema(fromEndpoint: URL(string: graphqlUrl)!, generateTo: "/Users/arackis/Documents/git/graphql-swift/Sources/codegen-results");
     } catch {
         print("caught")
     }

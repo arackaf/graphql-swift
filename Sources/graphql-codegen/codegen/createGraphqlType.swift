@@ -34,10 +34,15 @@ func printGraphqlArgs(_ args: [GraphqlIdentifier]) -> String {
     }
 }
 
+let imports = """
+import Foundation
+import graphql_swift
+"""
+
 struct TypeGenerator {
     func writeInputType(url: URL, inputType: GraphqlInputType) {
         let destination = url.appendingPathComponent("\(inputType.name).swift");
-        let fileContents = "struct \(inputType.name) {\n" + TAB + printStructFields(inputType.fields) + "\n}"
+        let fileContents = imports + "\n\nstruct \(inputType.name) {\n" + TAB + printStructFields(inputType.fields) + "\n}"
         
         do {
             try fileContents.write(to: destination, atomically: true, encoding: String.Encoding.utf8)
@@ -47,7 +52,7 @@ struct TypeGenerator {
     }
     func writeType(url: URL, type: GraphqlType) {
         let destination = url.appendingPathComponent("\(type.name).swift");
-        let fileContents = "struct \(type.name) {\n" + TAB + printStructFields(type.fields) + "\n}"
+        let fileContents = imports + "\n\nstruct \(type.name) {\n" + TAB + printStructFields(type.fields) + "\n}"
         
         do {
             try fileContents.write(to: destination, atomically: true, encoding: String.Encoding.utf8)
@@ -60,7 +65,7 @@ struct TypeGenerator {
         
         let capitalizedName = query.name.prefix(1).capitalized + query.name.dropFirst()
         
-        let funcDefinition = "func \(query.name)(_ filters: \(capitalizedName)Filters) -> \(query.returnType) {\n" + "}"
+        let funcDefinition = "func \(query.name)(_ filters: \(capitalizedName)Filters) -> \(query.returnType)? {\n\(TAB)return nil\n}"
         
         let filtersStruct = """
 struct \(capitalizedName)Filters {
@@ -69,15 +74,15 @@ struct \(capitalizedName)Filters {
 """
         
         let queryText = """
-let queryText = \"\"\"
+fileprivate let queryText = \"\"\"
 query \(query.name) \(printGraphqlArgs(query.args)){
 \(GQL_TAB)\(GQL_TAB)\(query.args.map{ "\($0.name): $\($0.name)" }.joined(separator: "\n" + GQL_TAB + GQL_TAB))
 }
 \"\"\"
 """
-                
+        
         do {
-            let pieces = [queryText, filtersStruct, funcDefinition]
+            let pieces = [imports, queryText, filtersStruct, funcDefinition]
             let wholeFile = pieces.joined(separator: "\n\n")
             
             try wholeFile.write(to: destination, atomically: true, encoding: String.Encoding.utf8)

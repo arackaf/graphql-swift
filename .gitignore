@@ -7,3 +7,6 @@ DerivedData/
 .swiftpm/config/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+Sources/codegen-results/input-types
+Sources/codegen-results/queries
+Sources/codegen-results/types
