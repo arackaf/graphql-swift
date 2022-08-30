@@ -15,7 +15,10 @@ let package = Package(
             targets: ["graphql-swift"]),
         .library(
             name: "graphql-codegen",
-            targets: ["graphql-codegen"]),
+            targets: ["graphql-codegen", "graphql-swift"]),
+        .library(
+            name: "codegen-results",
+            targets: ["codegen-results", "graphql-swift"]),
         .executable(
             name: "local-run-codegen",
             targets: ["local-run-codegen", "graphql-codegen"])
@@ -32,7 +35,10 @@ let package = Package(
             dependencies: []),
         .target(
             name: "graphql-codegen",
-            dependencies: []),
+            dependencies: ["graphql-swift"]),
+        .target(
+            name: "codegen-results",
+            dependencies: ["graphql-swift"]),
         .executableTarget(
             name: "local-run-codegen",
             dependencies: ["graphql-swift", "graphql-codegen"]),

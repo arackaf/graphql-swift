@@ -1,4 +1,5 @@
 import Foundation
+import graphql_swift
 
 public func generateSchema(fromEndpoint: URL, generateTo: String) async throws {
     let client = GraphqlClient(endpoint: fromEndpoint)
