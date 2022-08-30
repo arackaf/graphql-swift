@@ -22,20 +22,23 @@ func getSwiftType(_ json: [String: Any], nullable: Bool = true) -> String {
     }
 }
 
-func getGraphqlType(_ json: [String: Any], nullable: Bool = true) -> String {
+fileprivate let atomicTypes: Set<String> = ["JSON", "Int", "Float", "String", "Boolean", "ID"]
+
+func getGraphqlType(_ json: [String: Any], nullable: Bool = true) -> (type: String, atomic: Bool) {
     let kind: String? = json.get("kind")
     let modifier: String = nullable ? "" : "!"
     
     if kind == "LIST" {
         let nestedType = getGraphqlType(json.object("ofType")!)
-        return "[\(nestedType)]\(modifier)"
+        return ("[\(nestedType)]\(modifier)", false)
     } else if kind == "NON_NULL"{
         return getGraphqlType(json.object("ofType")!, nullable: false)
     } else {
         let name: String? = json.get("name")
         
         if let name = name {
-            return name + modifier
+            let atomic = atomicTypes.contains(name)
+            return (name + modifier, atomic)
         }
         return getGraphqlType(json.object("ofType")!, nullable: nullable)
     }
@@ -45,12 +48,16 @@ public struct GraphqlIdentifier: InitializableFromJSON {
     public let name: String
     public let swiftType: String
     public let graphqlType: String
+    public let isAtomic: Bool
     
     init(json: [String: Any]){
         name = json.get("name")!
         let typeField = json.object("type")!
         swiftType = getSwiftType(typeField)
-        graphqlType = getGraphqlType(typeField)
+
+        let typeInfo = getGraphqlType(typeField)
+        self.graphqlType = typeInfo.type
+        self.isAtomic = typeInfo.atomic
     }
 }
 

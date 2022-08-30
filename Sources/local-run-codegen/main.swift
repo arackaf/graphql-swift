@@ -2,8 +2,20 @@ import Foundation
 import graphql_swift
 import graphql_codegen
 
-
 let graphqlUrl = "https://mylibrary.onrender.com/graphql"
+
+
+struct Book {
+    enum fields: String {
+        case title
+        case authors
+        case publisher
+    }
+    
+    enum empty {}
+}
+
+
 
 func run() async {
     do {
@@ -15,6 +27,8 @@ func run() async {
         print("caught")
     }
 }
+
+/*
 let myGroup = DispatchGroup()
 myGroup.enter()
 
@@ -25,3 +39,4 @@ Task {
 }
 
 myGroup.wait()
+*/

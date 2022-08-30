@@ -1,11 +1,11 @@
 import Foundation
 
 let GQL_TAB = "  "
-let TAB = "  "
+let TAB = "    "
 let MAX_ARGS = 5
 
 func printStructFields(_ identifiers: [GraphqlIdentifier]) -> String {
-    return identifiers.map({ "var \($0.name): \($0.swiftType)" }).joined(separator: "\n" + TAB)
+    return TAB + identifiers.map({ "var \($0.name): \($0.swiftType)" }).joined(separator: "\n" + TAB)
 }
 
 func printFunctionArgs(_ args: [GraphqlIdentifier]) -> String {
@@ -34,6 +34,18 @@ func printGraphqlArgs(_ args: [GraphqlIdentifier]) -> String {
     }
 }
 
+func printFieldsEnum(_ fields: [GraphqlIdentifier]) -> String {
+    guard !fields.isEmpty else {
+        return ""
+    }
+    
+    return """
+\(TAB)enum Fields: String {
+\(TAB + TAB)\(fields.map { "case \($0.name)" }.joined(separator: "\n\(TAB + TAB)"))
+\(TAB)}
+"""
+}
+
 let imports = """
 import Foundation
 import graphql_swift
@@ -42,7 +54,7 @@ import graphql_swift
 struct TypeGenerator {
     func writeInputType(url: URL, inputType: GraphqlInputType) {
         let destination = url.appendingPathComponent("\(inputType.name).swift");
-        let fileContents = imports + "\n\nstruct \(inputType.name) {\n" + TAB + printStructFields(inputType.fields) + "\n}"
+        let fileContents = imports + "\n\nstruct \(inputType.name) {\n" + printStructFields(inputType.fields) + "\n}"
         
         do {
             try fileContents.write(to: destination, atomically: true, encoding: String.Encoding.utf8)
@@ -52,7 +64,15 @@ struct TypeGenerator {
     }
     func writeType(url: URL, type: GraphqlType) {
         let destination = url.appendingPathComponent("\(type.name).swift");
-        let fileContents = imports + "\n\nstruct \(type.name) {\n" + TAB + printStructFields(type.fields) + "\n}"
+        let fileContents = """
+\(imports)
+        
+struct \(type.name) {
+\(printStructFields(type.fields))
+ 
+\(printFieldsEnum(type.fields.filter({ $0.isAtomic })))
+}
+"""
         
         do {
             try fileContents.write(to: destination, atomically: true, encoding: String.Encoding.utf8)
@@ -69,7 +89,7 @@ struct TypeGenerator {
         
         let filtersStruct = """
 struct \(capitalizedName)Filters {
-\(TAB)\(printStructFields(query.args))
+\(printStructFields(query.args))
 }
 """
         
