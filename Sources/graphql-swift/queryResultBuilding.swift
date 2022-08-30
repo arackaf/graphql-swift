@@ -8,10 +8,15 @@ public protocol GraphqlResults {
     func emit() throws -> String
 }
 
-open class GraphqlResultsSection<Fields: RawRepresentable>: GraphqlResults where Fields.RawValue == String {
+open class GraphqlResultsBuilder<Fields: RawRepresentable>: GraphqlResults where Fields.RawValue == String {
     private var name: String = ""
     private var fields: [Fields] = []
     private var otherResults: [GraphqlResults] = []
+    
+    public init() {}
+    public init(name: String) {
+        self.name = name
+    }
     
     public func emit() throws -> String {
         let fieldsList = self.fields.map { $0.rawValue }.joined(separator: " ")
@@ -29,7 +34,7 @@ open class GraphqlResultsSection<Fields: RawRepresentable>: GraphqlResults where
 """
     }
     
-    public func withFields(_ fields: Fields...) {
+    public func withFields(_ fields: [Fields]) {
         self.fields = fields
     }
     
@@ -37,17 +42,3 @@ open class GraphqlResultsSection<Fields: RawRepresentable>: GraphqlResults where
         self.otherResults.append(results)
     }
 }
-
-
-public class Book {
-    public enum Fields: String {
-        case title
-        case author
-    }
-}
-
-public class BookResults: GraphqlResultsSection<Book.Fields> {
-    
-}
-
-

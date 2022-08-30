@@ -62,17 +62,33 @@ struct TypeGenerator {
             print("Caught error \(error)")
         }
     }
+    
     func writeType(url: URL, type: GraphqlType) {
         let destination = url.appendingPathComponent("\(type.name).swift");
-        let fileContents = """
-\(imports)
         
+        let typeContents = """
 struct \(type.name) {
 \(printStructFields(type.fields))
  
 \(printFieldsEnum(type.fields.filter({ $0.isAtomic })))
 }
 """
+        
+        let resultBuilderContents = """
+class \(type.name)Results {
+    private let resultsBuilder = GraphqlResultsBuilder<\(type.name).Fields>()
+    
+    func emits() throws -> String {
+        try resultsBuilder.emit()
+    }
+    
+    func withFields(_ fields: \(type.name).Fields...) {
+        resultsBuilder.withFields(fields)
+    }
+}
+"""
+        
+        let fileContents = [imports, typeContents, resultBuilderContents].joined(separator: "\n\n")
         
         do {
             try fileContents.write(to: destination, atomically: true, encoding: String.Encoding.utf8)

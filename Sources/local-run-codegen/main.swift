@@ -28,7 +28,7 @@ func run() async {
     }
 }
 
-/*
+
 let myGroup = DispatchGroup()
 myGroup.enter()
 
@@ -39,4 +39,3 @@ Task {
 }
 
 myGroup.wait()
-*/
