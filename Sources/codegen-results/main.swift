@@ -12,23 +12,18 @@ struct AuthenticatedGraphqlRequest<T: Codable>: Codable {
 class AuthenticatedGraphqlClient: GraphqlClient {
     static var loginToken: String = ""
     
-    override func adjustGraphqlPacket<D: Codable>(_ request: GenericGraphQLRequest<D>) -> Codable {
-        return AuthenticatedGraphqlRequest(query: request.query, variables: request.variables, loginToken: Self.loginToken)
+    override func encodeRequestBody<D: Codable>(_ request: GenericGraphQLRequest<D>) throws -> Data {
+        let authenticatedRequest = AuthenticatedGraphqlRequest(query: request.query, variables: request.variables, loginToken: Self.loginToken)
+        return try encodeBody(authenticatedRequest)
     }
     
-    func login() async throws {
+    static func login() async throws {
         Self.loginToken = try await authenticate()
     }
 }
 
 func foo() async throws {
-    var loginToken: String
-    do {
-        loginToken = try await authenticate()
-    } catch {
-        print("Error", error)
-        return
-    }
+    try await AuthenticatedGraphqlClient.login()
     
     var filters = AllBooksFilters()
     filters.title_contains = "Jefferson"
@@ -45,9 +40,8 @@ func foo() async throws {
             }
     }
     
-    let packet = AuthenticatedGraphqlRequest(query: result.0.query, variables: result.0.variables, loginToken: loginToken)
-    
-    let client = GraphqlClient(endpoint: URL(string: "https://my-library-io.herokuapp.com/graphql-ios")!)
+
+    let client = AuthenticatedGraphqlClient(endpoint: URL(string: "https://my-library-io.herokuapp.com/graphql-ios")!)
     
     func decode(_ json: Data) -> BookQueryResults? {
         let decoder = JSONDecoder()
@@ -56,7 +50,7 @@ func foo() async throws {
     
     let decoder = JSONDecoder()
     
-    let a = try await client.run(requestBody: packet) { json in
+    let a = try await client.run(requestBody: result.request) { json in
         return json
         //return try? decoder.decode(BookQueryResults.self, from: json)
     }

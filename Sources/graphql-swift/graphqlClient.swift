@@ -22,35 +22,48 @@ func decodeResponse<T: Decodable>(_ result: Data) throws -> T? {
 open class GraphqlClient {
     let endpoint: URL
     
+    public enum GraphqlClientErrors: Error {
+        case badRequestEncoding
+    }
+    
     public init(endpoint: URL) {
         self.endpoint = endpoint
     }
     
-    open func adjustGraphqlPacket<D>(_ request: GenericGraphQLRequest<D>) -> Codable {
-        return request
+    public func encodeBody<D: Codable>(_ request: D) throws -> Data {
+        guard let result = try? JSONEncoder().encode(request) else {
+            throw GraphqlClientErrors.badRequestEncoding
+        }
+        
+        return result
     }
     
     public func runQuery<T, D: Encodable>(_ request: GenericGraphQLRequest<D>) async throws -> T? {
-        let adjustedPacket = adjustGraphqlPacket(request)
+        //let adjustedPacket = adjustGraphqlPacket(request)
         
-        await try run(requestBody: adjustedPacket) { json in
-            return json
-        }
+        //await try run(requestBody: adjustedPacket) { json in
+        //    return json
+        //}
         
         return nil
     }
     
-    public func run<T, D: Encodable>(requestBody: D, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
-        guard let graphqlRequestPacket = try? JSONEncoder().encode(requestBody) else {
-            print("Error: Trying to convert model to JSON data")
-            return nil
-        }
-
+    open func encodeRequestBody<D: Codable>(_ request: GenericGraphQLRequest<D>) throws -> Data {
+        return try encodeBody(request)
+    }
+    
+    public func run<T, D: Encodable>(requestBody: GenericGraphQLRequest<D>, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
+        let requestData = try encodeRequestBody(requestBody)
+        
+        return try? await run(requestData: requestData, produceResult)
+    }
+    
+    public func run<T>(requestData: Data, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type") // the request is JSON
         request.setValue("application/json", forHTTPHeaderField: "Accept") // the response expected to be in JSON format
-        request.httpBody = graphqlRequestPacket
+        request.httpBody = requestData
         
         return try? await run(request: request, produceResult)
     }
