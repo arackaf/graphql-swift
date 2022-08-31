@@ -24,13 +24,13 @@ func getSwiftType(_ json: [String: Any], nullable: Bool = true) -> String {
 
 fileprivate let atomicTypes: Set<String> = ["JSON", "Int", "Float", "String", "Boolean", "ID"]
 
-func getGraphqlType(_ json: [String: Any], nullable: Bool = true) -> (type: String, atomic: Bool) {
+func getGraphqlType(_ json: [String: Any], nullable: Bool = true) -> (type: String, atomic: Bool, rootType: String) {
     let kind: String? = json.get("kind")
     let modifier: String = nullable ? "" : "!"
     
     if kind == "LIST" {
         let nestedType = getGraphqlType(json.object("ofType")!)
-        return ("[\(nestedType)]\(modifier)", false)
+        return ("[\(nestedType.type)]\(modifier)", nestedType.atomic, nestedType.rootType)
     } else if kind == "NON_NULL"{
         return getGraphqlType(json.object("ofType")!, nullable: false)
     } else {
@@ -38,7 +38,7 @@ func getGraphqlType(_ json: [String: Any], nullable: Bool = true) -> (type: Stri
         
         if let name = name {
             let atomic = atomicTypes.contains(name)
-            return (name + modifier, atomic)
+            return (name + modifier, atomic, name)
         }
         return getGraphqlType(json.object("ofType")!, nullable: nullable)
     }
@@ -47,6 +47,8 @@ func getGraphqlType(_ json: [String: Any], nullable: Bool = true) -> (type: Stri
 public struct GraphqlIdentifier: InitializableFromJSON {
     public let name: String
     public let swiftType: String
+    public let nullableSwiftType: String
+    public let rootType: String
     public let graphqlType: String
     public let isAtomic: Bool
     
@@ -54,10 +56,13 @@ public struct GraphqlIdentifier: InitializableFromJSON {
         name = json.get("name")!
         let typeField = json.object("type")!
         swiftType = getSwiftType(typeField)
+        let lastChar = swiftType.last!
+        nullableSwiftType = lastChar == "?" ? swiftType : swiftType + "?"
 
         let typeInfo = getGraphqlType(typeField)
         self.graphqlType = typeInfo.type
         self.isAtomic = typeInfo.atomic
+        self.rootType = typeInfo.rootType
     }
 }
 

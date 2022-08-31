@@ -4,8 +4,8 @@ let GQL_TAB = "  "
 let TAB = "    "
 let MAX_ARGS = 5
 
-func printStructFields(_ identifiers: [GraphqlIdentifier]) -> String {
-    return TAB + identifiers.map({ "var \($0.name): \($0.swiftType)" }).joined(separator: "\n" + TAB)
+func printStructFields(_ identifiers: [GraphqlIdentifier], forceNullable: Bool = false) -> String {
+    return TAB + identifiers.map({ "var \($0.name): \(forceNullable ? $0.nullableSwiftType : $0.swiftType)" }).joined(separator: "\n" + TAB)
 }
 
 func printFunctionArgs(_ args: [GraphqlIdentifier]) -> String {
@@ -36,7 +36,7 @@ func printGraphqlArgs(_ args: [GraphqlIdentifier]) -> String {
 
 func printFieldsEnum(_ fields: [GraphqlIdentifier]) -> String {
     guard !fields.isEmpty else {
-        return ""
+        return "\(TAB)enum Fields: String { case empty }"
     }
     
     return """
@@ -68,23 +68,51 @@ struct TypeGenerator {
         
         let typeContents = """
 struct \(type.name) {
-\(printStructFields(type.fields))
+\(printStructFields(type.fields, forceNullable: true))
  
 \(printFieldsEnum(type.fields.filter({ $0.isAtomic })))
 }
 """
+        let atomicFields = type.fields.filter({ $0.isAtomic })
+        let nonAtomicFields = type.fields.filter({ !$0.isAtomic })
         
-        let resultBuilderContents = """
-class \(type.name)Results {
-    private let resultsBuilder = GraphqlResultsBuilder<\(type.name).Fields>()
-    
-    func emits() throws -> String {
-        try resultsBuilder.emit()
-    }
-    
+        let otherResultSets = nonAtomicFields.map({ field in  """
+\(TAB)func with\(field.name)(_ fields: \(field.name)Fields...) {
+\(TAB + TAB)resultsBuilder.
+\(TAB)}
+"""
+        })
+        
+        let withFieldsDefinition = atomicFields.isEmpty ? "" :
+        """
+
     func withFields(_ fields: \(type.name).Fields...) {
         resultsBuilder.withFields(fields)
     }
+"""
+        
+        let resultBuilderDefinitions = nonAtomicFields.isEmpty ? "" : nonAtomicFields.map({ def in
+            let capitalizedName = def.name.prefix(1).capitalized + def.name.dropFirst()
+            
+            return """
+    
+    func with\(capitalizedName)(_ build: (\(def.rootType)Results) -> ()) {
+        let res = \(def.rootType)Results()
+        build(res)
+        resultsBuilder.addResultSet(res)
+    }
+"""
+        }).joined(separator: "\n")
+        
+        let resultBuilderContents = """
+class \(type.name)Results: GraphqlResults {
+    private let resultsBuilder = GraphqlResultsBuilder<\(type.name).Fields>()
+    
+    func emit() throws -> String {
+        try resultsBuilder.emit()
+    }
+\(withFieldsDefinition)
+\(resultBuilderDefinitions)
 }
 """
         

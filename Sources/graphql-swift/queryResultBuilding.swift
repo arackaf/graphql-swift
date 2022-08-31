@@ -35,10 +35,10 @@ open class GraphqlResultsBuilder<Fields: RawRepresentable>: GraphqlResults where
     }
     
     public func withFields(_ fields: [Fields]) {
-        self.fields = fields
+        self.fields.append(contentsOf: fields)
     }
     
-    func addResultSet(_ results: GraphqlResults) {
+    public func addResultSet(_ results: GraphqlResults) {
         self.otherResults.append(results)
     }
 }

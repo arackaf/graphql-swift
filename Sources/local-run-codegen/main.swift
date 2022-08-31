@@ -2,7 +2,7 @@ import Foundation
 import graphql_swift
 import graphql_codegen
 
-let graphqlUrl = "https://mylibrary.onrender.com/graphql"
+let graphqlUrl = "https://my-library-io.herokuapp.com/graphql"
 
 
 struct Book {
