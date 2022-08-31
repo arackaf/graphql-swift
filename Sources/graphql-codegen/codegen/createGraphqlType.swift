@@ -86,8 +86,10 @@ struct \(type.name) {
         let withFieldsDefinition = atomicFields.isEmpty ? "" :
         """
 
-    func withFields(_ fields: \(type.name).Fields...) {
+    @discardableResult
+    func withFields(_ fields: \(type.name).Fields...) -> Self {
         resultsBuilder.withFields(fields)
+        return self
     }
 """
         
@@ -96,10 +98,13 @@ struct \(type.name) {
             
             return """
     
-    func with\(capitalizedName)(_ build: (\(def.rootType)Builder) -> ()) {
+    @discardableResult
+    func with\(capitalizedName)(_ build: (\(def.rootType)Builder) -> ()) -> Self {
         let res = \(def.rootType)Builder()
         build(res)
         resultsBuilder.addResultSet(res)
+
+        return self
     }
 """
         }).joined(separator: "\n")
