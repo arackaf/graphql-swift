@@ -133,10 +133,11 @@ class \(type.name)Builder: GraphqlResults {
         let capitalizedName = query.name.prefix(1).capitalized + query.name.dropFirst()
         let filtersType = "\(capitalizedName)Filters"
         let requestType = "GenericGraphQLRequest<\(filtersType)>"
+        let funcReturnType = "QueryPacket<\(filtersType), \(query.returnType)>"
         
         //\(query.returnType)?
         let funcDefinition = """
-func \(query.name)(_ filters: \(filtersType), buildSelection: (\(query.rootReturnType)Builder) -> ()) throws -> QueryPacket<\(filtersType)> {
+func \(query.name)(_ filters: \(filtersType), buildSelection: (\(query.rootReturnType)Builder) -> ()) throws -> \(funcReturnType) {
     let selectionBuilder = \(query.rootReturnType)Builder()
     buildSelection(selectionBuilder)
 

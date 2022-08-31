@@ -1,6 +1,6 @@
 import Foundation
 
-public typealias QueryPacket<Req: Codable> = (GenericGraphQLRequest<Req>, Codable.Type)
+public typealias QueryPacket<Req: Codable, Type: Codable> = (request: GenericGraphQLRequest<Req>, SerializedResult: Codable.Type)
 
 public struct GenericGraphQLRequest<T: Codable> : Codable {
     public let query: String
@@ -32,6 +32,10 @@ open class GraphqlClient {
     
     public func runQuery<T, D: Encodable>(_ request: GenericGraphQLRequest<D>) async throws -> T? {
         let adjustedPacket = adjustGraphqlPacket(request)
+        
+        await try run(requestBody: adjustedPacket) { json in
+            return json
+        }
         
         return nil
     }

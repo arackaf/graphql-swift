@@ -11,7 +11,8 @@ struct AuthenticatedGraphqlRequest<T: Codable>: Codable {
 
 class AuthenticatedGraphqlClient: GraphqlClient {
     static var loginToken: String = ""
-    override func adjustGraphqlPacket<D>(_ request: GenericGraphQLRequest<D>) -> Codable {
+    
+    override func adjustGraphqlPacket<D: Codable>(_ request: GenericGraphQLRequest<D>) -> Codable {
         return AuthenticatedGraphqlRequest(query: request.query, variables: request.variables, loginToken: Self.loginToken)
     }
     
