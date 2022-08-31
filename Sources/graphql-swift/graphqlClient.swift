@@ -2,8 +2,8 @@ import Foundation
 
 
 public struct GenericGraphQLRequest<T: Codable> : Codable {
-    let query: String
-    let variables: T
+    public let query: String
+    public let variables: T
     
     public init(query: String, variables: T) {
         self.query = query
@@ -25,8 +25,6 @@ open class GraphqlClient {
         self.endpoint = endpoint
     }
     
-    open func adjustRequest(_ request: inout URLRequest) {}
-    
     public func run<T, D: Encodable>(requestBody: D, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
         guard let graphqlRequestPacket = try? JSONEncoder().encode(requestBody) else {
             print("Error: Trying to convert model to JSON data")
@@ -39,7 +37,7 @@ open class GraphqlClient {
         request.setValue("application/json", forHTTPHeaderField: "Accept") // the response expected to be in JSON format
         request.httpBody = graphqlRequestPacket
         
-        adjustRequest(&request)
+        print("\n\n", String(data: graphqlRequestPacket, encoding: .utf8), "\n\n")
         
         return try? await run(request: request, produceResult)
     }

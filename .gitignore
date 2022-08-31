@@ -10,3 +10,4 @@ DerivedData/
 Sources/codegen-results/input-types
 Sources/codegen-results/queries
 Sources/codegen-results/types
+Sources/codegen-results/loginCredentials.swift
