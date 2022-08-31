@@ -11,13 +11,6 @@ public struct GenericGraphQLRequest<T: Codable> : Codable {
     }
 }
 
-struct XFilters: Codable {
-    public let a: String
-}
-
-let x = GenericGraphQLRequest<XFilters>(query: "", variables: XFilters(a: ""))
-
-
 func decodeResponse<T: Decodable>(_ result: Data) throws -> T? {
     let decoder = JSONDecoder()
     
@@ -32,6 +25,8 @@ open class GraphqlClient {
         self.endpoint = endpoint
     }
     
+    open func adjustRequest(_ request: inout URLRequest) {}
+    
     public func run<T, D: Encodable>(requestBody: D, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
         guard let graphqlRequestPacket = try? JSONEncoder().encode(requestBody) else {
             print("Error: Trying to convert model to JSON data")
@@ -43,6 +38,8 @@ open class GraphqlClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type") // the request is JSON
         request.setValue("application/json", forHTTPHeaderField: "Accept") // the response expected to be in JSON format
         request.httpBody = graphqlRequestPacket
+        
+        adjustRequest(&request)
         
         return try? await run(request: request, produceResult)
     }
