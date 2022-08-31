@@ -9,6 +9,17 @@ struct AuthenticatedGraphqlRequest<T: Codable>: Codable {
     let loginToken: String 
 }
 
+class AuthenticatedGraphqlClient: GraphqlClient {
+    static var loginToken: String = ""
+    override func adjustGraphqlPacket<D>(_ request: GenericGraphQLRequest<D>) -> Codable {
+        return AuthenticatedGraphqlRequest(query: request.query, variables: request.variables, loginToken: Self.loginToken)
+    }
+    
+    func login() async throws {
+        Self.loginToken = try await authenticate()
+    }
+}
+
 func foo() async throws {
     var loginToken: String
     do {

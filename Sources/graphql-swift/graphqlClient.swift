@@ -25,6 +25,16 @@ open class GraphqlClient {
         self.endpoint = endpoint
     }
     
+    open func adjustGraphqlPacket<D>(_ request: GenericGraphQLRequest<D>) -> Codable {
+        return request
+    }
+    
+    public func runQuery<T, D: Encodable>(_ request: GenericGraphQLRequest<D>) async throws -> T? {
+        let adjustedPacket = adjustGraphqlPacket(request)
+        
+        return nil
+    }
+    
     public func run<T, D: Encodable>(requestBody: D, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
         guard let graphqlRequestPacket = try? JSONEncoder().encode(requestBody) else {
             print("Error: Trying to convert model to JSON data")
