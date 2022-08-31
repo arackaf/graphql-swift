@@ -44,7 +44,7 @@ func foo() async throws {
             }
     }
     
-    
+    let packet = AuthenticatedGraphqlRequest(query: result.0.query, variables: result.0.variables, loginToken: loginToken)
     
     let client = GraphqlClient(endpoint: URL(string: "https://my-library-io.herokuapp.com/graphql-ios")!)
     
@@ -55,7 +55,6 @@ func foo() async throws {
     
     let decoder = JSONDecoder()
     
-    let packet = AuthenticatedGraphqlRequest(query: result.0.query, variables: result.0.variables, loginToken: loginToken)
     let a = try await client.run(requestBody: packet) { json in
         return json
         //return try? decoder.decode(BookQueryResults.self, from: json)
