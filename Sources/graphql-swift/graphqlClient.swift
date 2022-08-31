@@ -1,5 +1,6 @@
 import Foundation
 
+public typealias QueryPacket<Req: Codable> = (GenericGraphQLRequest<Req>, Codable.Type)
 
 public struct GenericGraphQLRequest<T: Codable> : Codable {
     public let query: String
