@@ -96,8 +96,8 @@ struct \(type.name) {
             
             return """
     
-    func with\(capitalizedName)(_ build: (\(def.rootType)Results) -> ()) {
-        let res = \(def.rootType)Results()
+    func with\(capitalizedName)(_ build: (\(def.rootType)Builder) -> ()) {
+        let res = \(def.rootType)Builder()
         build(res)
         resultsBuilder.addResultSet(res)
     }
@@ -105,7 +105,7 @@ struct \(type.name) {
         }).joined(separator: "\n")
         
         let resultBuilderContents = """
-class \(type.name)Results: GraphqlResults {
+class \(type.name)Builder: GraphqlResults {
     private let resultsBuilder = GraphqlResultsBuilder<\(type.name).Fields>()
     
     func emit() throws -> String {
@@ -129,7 +129,15 @@ class \(type.name)Results: GraphqlResults {
         
         let capitalizedName = query.name.prefix(1).capitalized + query.name.dropFirst()
         
-        let funcDefinition = "func \(query.name)(_ filters: \(capitalizedName)Filters) -> \(query.returnType)? {\n\(TAB)return nil\n}"
+        let funcDefinition = """
+func \(query.name)(_ filters: \(capitalizedName)Filters, buildResults: (\(query.rootReturnType)Builder) -> ()) throws -> \(query.returnType)? {
+    let res = \(query.rootReturnType)Builder()
+    buildResults(res)
+    try res.emit()
+
+    return nil
+}
+"""
         
         let filtersStruct = """
 struct \(capitalizedName)Filters {

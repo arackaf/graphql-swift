@@ -89,6 +89,7 @@ public struct GraphqlType: InitializableFromJSON {
 public struct GraphqlQueryType: InitializableFromJSON {
     public let name: String
     public let returnType: String
+    public let rootReturnType: String
     public let args: [GraphqlIdentifier]
     
     init(json: [String: Any]){
@@ -96,6 +97,9 @@ public struct GraphqlQueryType: InitializableFromJSON {
         
         let typeField = json.object("type")!
         returnType = getSwiftType(typeField)
+        
+        let returnTypeInfo = getGraphqlType(typeField)
+        rootReturnType = returnTypeInfo.rootType
         
         args = json.array("args")?.produce() ?? []
     }
