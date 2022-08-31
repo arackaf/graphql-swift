@@ -54,7 +54,7 @@ import graphql_swift
 struct TypeGenerator {
     func writeInputType(url: URL, inputType: GraphqlInputType) {
         let destination = url.appendingPathComponent("\(inputType.name).swift");
-        let fileContents = imports + "\n\nstruct \(inputType.name) {\n" + printStructFields(inputType.fields) + "\n}"
+        let fileContents = imports + "\n\nstruct \(inputType.name): Codable {\n" + printStructFields(inputType.fields) + "\n}"
         
         do {
             try fileContents.write(to: destination, atomically: true, encoding: String.Encoding.utf8)
@@ -67,7 +67,7 @@ struct TypeGenerator {
         let destination = url.appendingPathComponent("\(type.name).swift");
         
         let typeContents = """
-struct \(type.name) {
+struct \(type.name): Codable {
 \(printStructFields(type.fields, forceNullable: true))
  
 \(printFieldsEnum(type.fields.filter({ $0.isAtomic })))
@@ -75,13 +75,6 @@ struct \(type.name) {
 """
         let atomicFields = type.fields.filter({ $0.isAtomic })
         let nonAtomicFields = type.fields.filter({ !$0.isAtomic })
-        
-        let otherResultSets = nonAtomicFields.map({ field in  """
-\(TAB)func with\(field.name)(_ fields: \(field.name)Fields...) {
-\(TAB + TAB)resultsBuilder.
-\(TAB)}
-"""
-        })
         
         let withFieldsDefinition = atomicFields.isEmpty ? "" :
         """
@@ -138,31 +131,40 @@ class \(type.name)Builder: GraphqlResults {
         let destination = url.appendingPathComponent("\(query.name).swift")
         
         let capitalizedName = query.name.prefix(1).capitalized + query.name.dropFirst()
+        let filtersType = "\(capitalizedName)Filters"
+        let requestType = "GenericGraphQLRequest<\(filtersType)>"
         
         //\(query.returnType)?
         let funcDefinition = """
-func \(query.name)(_ filters: \(capitalizedName)Filters, buildResults: (\(query.rootReturnType)Builder) -> ()) throws -> String {
-    let res = \(query.rootReturnType)Builder()
-    buildResults(res)
-    let x = try res.emit()
+func \(query.name)(_ filters: \(filtersType), buildSelection: (\(query.rootReturnType)Builder) -> ()) throws -> \(requestType) {
+    let selectionBuilder = \(query.rootReturnType)Builder()
+    buildSelection(selectionBuilder)
 
-    return x
-    //return nil
+    let selectionText = try selectionBuilder.emit()
+    let query = getQueryText(selectionText);
+
+    return \(requestType)(query: query, variables: filters)
 }
 """
         
         let filtersStruct = """
-struct \(capitalizedName)Filters {
+struct \(capitalizedName)Filters: Codable {
 \(printStructFields(query.args))
 }
 """
         
         let queryText = """
-fileprivate let queryText = \"\"\"
-query \(query.name) \(printGraphqlArgs(query.args)){
-\(GQL_TAB)\(GQL_TAB)\(query.args.map{ "\($0.name): $\($0.name)" }.joined(separator: "\n" + GQL_TAB + GQL_TAB))
+fileprivate func getQueryText(_ selection: String) -> String {
+    return \"\"\"
+query \(query.name) \(printGraphqlArgs(query.args)) { \n  \(query.name) (
+    \(query.args.map{ "\($0.name): $\($0.name)" }.joined(separator: "\n    "))
+)
+
+\\(selection)
+
 }
 \"\"\"
+}
 """
         
         do {

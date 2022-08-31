@@ -1,10 +1,21 @@
 import Foundation
 
 
-struct GenericGraphQLRequest<T: Codable> : Codable {
+public struct GenericGraphQLRequest<T: Codable> : Codable {
     let query: String
     let variables: T
+    
+    public init(query: String, variables: T) {
+        self.query = query
+        self.variables = variables
+    }
 }
+
+struct XFilters: Codable {
+    public let a: String
+}
+
+let x = GenericGraphQLRequest<XFilters>(query: "", variables: XFilters(a: ""))
 
 
 func decodeResponse<T: Decodable>(_ result: Data) throws -> T? {
