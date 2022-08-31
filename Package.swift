@@ -16,7 +16,7 @@ let package = Package(
         .library(
             name: "graphql-codegen",
             targets: ["graphql-codegen", "graphql-swift"]),
-        .library(
+        .executable(
             name: "codegen-results",
             targets: ["codegen-results", "graphql-swift"]),
         .executable(
@@ -36,7 +36,7 @@ let package = Package(
         .target(
             name: "graphql-codegen",
             dependencies: ["graphql-swift"]),
-        .target(
+        .executableTarget(
             name: "codegen-results",
             dependencies: ["graphql-swift"]),
         .executableTarget(
