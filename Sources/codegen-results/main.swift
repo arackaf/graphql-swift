@@ -3,7 +3,7 @@ import graphql_swift
 
 print("Helloooo")
 
-struct A<T: Codable>: Codable {
+struct AuthenticatedGraphqlRequest<T: Codable>: Codable {
     let query: String
     let variables: T
     let loginToken: String 
@@ -33,17 +33,37 @@ func foo() async throws {
             }
     }
     
-    let packet = A(query: result.query, variables: result.variables, loginToken: loginToken)
+    let packet = AuthenticatedGraphqlRequest(query: result.0.query, variables: result.0.variables, loginToken: loginToken)
     
     let client = GraphqlClient(endpoint: URL(string: "https://my-library-io.herokuapp.com/graphql-ios")!)
+    
+    func decode(_ json: Data) -> BookQueryResults? {
+        let decoder = JSONDecoder()
+        return try? decoder.decode(BookQueryResults.self, from: json)
+    }
+    
+    let decoder = JSONDecoder()
+    
+    let a = try await client.run(requestBody: packet) { json in
+        return json
+        //return try? decoder.decode(BookQueryResults.self, from: json)
+    }
+
+    print(a)
+    
+    /*
     let x = try await client.run(requestBody: packet) { json in
-        //print(json);
+        // print(json);
         //let d: String
         return json
     }
 
     print(x)
+     */
+    
+    
 }
+
 
 let myGroup = DispatchGroup()
 myGroup.enter()

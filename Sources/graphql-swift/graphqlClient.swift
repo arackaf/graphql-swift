@@ -37,8 +37,6 @@ open class GraphqlClient {
         request.setValue("application/json", forHTTPHeaderField: "Accept") // the response expected to be in JSON format
         request.httpBody = graphqlRequestPacket
         
-        print("\n\n", String(data: graphqlRequestPacket, encoding: .utf8), "\n\n")
-        
         return try? await run(request: request, produceResult)
     }
 

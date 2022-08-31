@@ -136,14 +136,14 @@ class \(type.name)Builder: GraphqlResults {
         
         //\(query.returnType)?
         let funcDefinition = """
-func \(query.name)(_ filters: \(filtersType), buildSelection: (\(query.rootReturnType)Builder) -> ()) throws -> \(requestType) {
+func \(query.name)(_ filters: \(filtersType), buildSelection: (\(query.rootReturnType)Builder) -> ()) throws -> (\(requestType), Codable.Type) {
     let selectionBuilder = \(query.rootReturnType)Builder()
     buildSelection(selectionBuilder)
 
     let selectionText = try selectionBuilder.emit()
     let query = getQueryText(selectionText);
 
-    return \(requestType)(query: query, variables: filters)
+    return (\(requestType)(query: query, variables: filters), \(query.returnType).self)
 }
 """
         
