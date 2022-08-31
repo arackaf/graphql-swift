@@ -100,7 +100,7 @@ struct \(type.name) {
     
     @discardableResult
     func with\(capitalizedName)(_ build: (\(def.rootType)Builder) -> ()) -> Self {
-        let res = \(def.rootType)Builder()
+        let res = \(def.rootType)Builder("\(def.name)")
         build(res)
         resultsBuilder.addResultSet(res)
 
@@ -113,6 +113,11 @@ struct \(type.name) {
 class \(type.name)Builder: GraphqlResults {
     private let resultsBuilder = GraphqlResultsBuilder<\(type.name).Fields>()
     
+    init() {}
+    init(_ name: String) {
+        resultsBuilder.setName(name);
+    }
+
     func emit() throws -> String {
         try resultsBuilder.emit()
     }
@@ -134,13 +139,15 @@ class \(type.name)Builder: GraphqlResults {
         
         let capitalizedName = query.name.prefix(1).capitalized + query.name.dropFirst()
         
+        //\(query.returnType)?
         let funcDefinition = """
-func \(query.name)(_ filters: \(capitalizedName)Filters, buildResults: (\(query.rootReturnType)Builder) -> ()) throws -> \(query.returnType)? {
+func \(query.name)(_ filters: \(capitalizedName)Filters, buildResults: (\(query.rootReturnType)Builder) -> ()) throws -> String {
     let res = \(query.rootReturnType)Builder()
     buildResults(res)
-    try res.emit()
+    let x = try res.emit()
 
-    return nil
+    return x
+    //return nil
 }
 """
         

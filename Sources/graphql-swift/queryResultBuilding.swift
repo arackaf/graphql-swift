@@ -18,6 +18,10 @@ open class GraphqlResultsBuilder<Fields: RawRepresentable>: GraphqlResults where
         self.name = name
     }
     
+    public func setName(_ name: String){
+        self.name = name
+    }
+    
     public func emit() throws -> String {
         let fieldsList = self.fields.map { $0.rawValue }.joined(separator: " ")
         let otherResults = try self.otherResults.map { try $0.emit() }.joined(separator: "\n")
@@ -27,11 +31,7 @@ open class GraphqlResultsBuilder<Fields: RawRepresentable>: GraphqlResults where
             throw QueryBuildingErrors.noResultsSelected
         }
         
-        return """
-\(self.name) {
-\(allResults.joined(separator: "\n"))
-}
-"""
+        return "\(self.name) { \(allResults.joined(separator: "\n")) }"
     }
     
     public func withFields(_ fields: [Fields]) {

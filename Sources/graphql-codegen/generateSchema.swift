@@ -24,7 +24,7 @@ public func generateSchema(fromEndpoint: URL, generateTo: String) async throws {
         }
     }
     
-    let TypesSkip: Set<String> = ["__Directive", "__EnumValue", "__Field", "__InputValue", "__Schema", "__Type"]
+    let TypesSkip: Set<String> = ["__Directive", "__EnumValue", "__Field", "__InputValue", "__Schema", "__Type", "Query"]
     
     if let typesResponse = typesResponse {
         for type in typesResponse.filter({ !TypesSkip.contains($0.name) }) {
