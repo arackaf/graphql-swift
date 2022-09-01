@@ -1,4 +1,5 @@
 import Foundation
+import graphql_swift
 
 struct GraphqlSchemaRequest: Codable {
     let query: String
