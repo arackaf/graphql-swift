@@ -1,6 +1,6 @@
 import Foundation
 
-public typealias QueryPacket<Req: Codable, Type: Codable> = (request: GenericGraphQLRequest<Req>, SerializedResult: Codable.Type)
+public typealias QueryPacket<Req: Codable, Res: Codable> = (request: GenericGraphQLRequest<Req>, SerializedResult: Res.Type)
 
 public struct GenericGraphQLRequest<T: Codable> : Codable {
     public let query: String
@@ -24,6 +24,7 @@ open class GraphqlClient {
     
     public enum GraphqlClientErrors: Error {
         case badRequestEncoding
+        case invalidResult
     }
     
     public init(endpoint: URL) {
@@ -38,44 +39,53 @@ open class GraphqlClient {
         return result
     }
     
-    public func runQuery<T, D: Encodable>(_ request: GenericGraphQLRequest<D>) async throws -> T? {
+    public func runQuery<D, T>(_ request: QueryPacket<D, T>) async throws -> T {
+        return try await run(requestBody: request.request) { (res) throws -> T in
+            let decoder = JSONDecoder()
+            return try decoder.decode(T.self, from: res)
+        }
+         
         //let adjustedPacket = adjustGraphqlPacket(request)
         
         //await try run(requestBody: adjustedPacket) { json in
         //    return json
         //}
-        
-        return nil
     }
     
     open func encodeRequestBody<D: Codable>(_ request: GenericGraphQLRequest<D>) throws -> Data {
         return try encodeBody(request)
     }
     
-    public func run<T, D: Encodable>(requestBody: GenericGraphQLRequest<D>, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
+    public func run<T, D: Encodable>(requestBody: GenericGraphQLRequest<D>, _ produceResult: ((Data) throws -> T)) async throws -> T {
         let requestData = try encodeRequestBody(requestBody)
         
-        return try? await run(requestData: requestData, produceResult)
+        return try await run(requestData: requestData, produceResult)
     }
     
-    public func run<T>(requestData: Data, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
+    public func run<T>(requestData: Data, _ produceResult: ((Data) throws -> T)) async throws -> T {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type") // the request is JSON
         request.setValue("application/json", forHTTPHeaderField: "Accept") // the response expected to be in JSON format
         request.httpBody = requestData
         
-        return try? await run(request: request, produceResult)
+        return try await run(request: request, produceResult)
     }
 
-    public func run<T>(request: URLRequest, _ produceResult: (([String: Any]) -> T?)) async throws -> T? {
+    public func run<T>(request: URLRequest, _ produceResult: ((Data) throws -> T)) async throws -> T {
         let jsonResult = try await jsonRequest(request);
         
         let graphqlData = jsonResult["data"] as? [String: Any];
         guard let graphqlData = graphqlData else {
-            return nil
+            throw GraphqlClientErrors.invalidResult
         }
-        return produceResult(graphqlData)
+        guard let allBooks = graphqlData["allBooks"] else {
+            throw GraphqlClientErrors.invalidResult
+        }
+        
+        let data = try JSONSerialization.data(withJSONObject: allBooks)
+        
+        return try produceResult(data)
     }
 
 }

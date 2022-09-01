@@ -1,8 +1,6 @@
 import Foundation
 import graphql_swift
 
-print("Helloooo")
-
 struct AuthenticatedGraphqlRequest<T: Codable>: Codable {
     let query: String
     let variables: T
@@ -48,26 +46,10 @@ func foo() async throws {
         return try? decoder.decode(BookQueryResults.self, from: json)
     }
     
-    let decoder = JSONDecoder()
-    
-    let a = try await client.run(requestBody: result.request) { json in
-        return json
-        //return try? decoder.decode(BookQueryResults.self, from: json)
-    }
+    let a = try await client.runQuery(result)
 
-    print(a)
-    
-    /*
-    let x = try await client.run(requestBody: packet) { json in
-        // print(json);
-        //let d: String
-        return json
-    }
-
-    print(x)
-     */
-    
-    
+    print("count", a.Books?.count)
+    print("title = ", a.Books?[0].title)
 }
 
 
