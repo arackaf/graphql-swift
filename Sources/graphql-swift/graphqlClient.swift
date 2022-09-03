@@ -43,26 +43,12 @@ open class GraphqlClient {
         return result
     }
     
-    public func runQuery<D, T>(_ request: QueryPacket<D, T>) async throws -> T {
+    public func runQuery<D, T>(_ request: QueryPacket<D, GraphqlResponse<T>>) async throws -> T {
         return try await run(requestBody: request.request) { (res) throws -> T in
-            guard let jsonResult = try? JSONSerialization.jsonObject(with: res) as? [String: Any] else {
-                print("Error: Cannot convert data to JSON object")
-                
-                throw NetworkRequestError.nonJsonResponse
-            }
-            
-            let graphqlData = jsonResult["data"] as? [String: Any];
-            guard let graphqlData = graphqlData else {
-                throw GraphqlClientErrors.invalidResult
-            }
-            guard let allBooks = graphqlData["allBooks"] else {
-                throw GraphqlClientErrors.invalidResult
-            }
-            
-            let data = try JSONSerialization.data(withJSONObject: allBooks)
-            
             let decoder = JSONDecoder()
-            return try decoder.decode(T.self, from: data)
+            let result = try decoder.decode(GraphqlResponse<T>.self, from: res)
+            
+            return result.data
         }
     }
     

@@ -48,8 +48,8 @@ func foo() async throws {
     
     let a = try await client.runQuery(result)
 
-    print("count", a.data.allBooks.Books?.count)
-    print("title = ", a.data.allBooks.Books?[0].title)
+    print("count", a.allBooks.Books?.count)
+    print("title = ", a.allBooks.Books?[0].title)
 }
 
 
