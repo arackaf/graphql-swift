@@ -41,19 +41,45 @@ open class GraphqlClient {
     
     public func runQuery<D, T>(_ request: QueryPacket<D, T>) async throws -> T {
         return try await run(requestBody: request.request) { (res) throws -> T in
+            guard let jsonResult = try? JSONSerialization.jsonObject(with: res) as? [String: Any] else {
+                print("Error: Cannot convert data to JSON object")
+                
+                throw NetworkRequestError.nonJsonResponse
+            }
+            
+            let graphqlData = jsonResult["data"] as? [String: Any];
+            guard let graphqlData = graphqlData else {
+                throw GraphqlClientErrors.invalidResult
+            }
+            guard let allBooks = graphqlData["allBooks"] else {
+                throw GraphqlClientErrors.invalidResult
+            }
+            
+            let data = try JSONSerialization.data(withJSONObject: allBooks)
+            
             let decoder = JSONDecoder()
-            return try decoder.decode(T.self, from: res)
+            return try decoder.decode(T.self, from: data)
         }
-         
-        //let adjustedPacket = adjustGraphqlPacket(request)
-        
-        //await try run(requestBody: adjustedPacket) { json in
-        //    return json
-        //}
     }
     
     open func encodeRequestBody<D: Codable>(_ request: GenericGraphQLRequest<D>) throws -> Data {
         return try encodeBody(request)
+    }
+    
+    public func runSchemaQuery<T>(_ query: String, _ produceResult: (([String: Any]) throws -> T)) async throws -> T {
+        let requestBody = GenericGraphQLRequest(query: query, variables: nil as String?)
+        let requestData = try encodeRequestBody(requestBody)
+        
+        return try await run(requestData: requestData) { (data) -> T in
+            guard let jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                print("Error: Cannot convert data to JSON object")
+                
+                throw NetworkRequestError.nonJsonResponse
+            }
+            
+            return try produceResult(jsonObject)
+            
+        }
     }
     
     public func run<T, D: Encodable>(requestBody: GenericGraphQLRequest<D>, _ produceResult: ((Data) throws -> T)) async throws -> T {
@@ -73,17 +99,7 @@ open class GraphqlClient {
     }
 
     public func run<T>(request: URLRequest, _ produceResult: ((Data) throws -> T)) async throws -> T {
-        let jsonResult = try await jsonRequest(request);
-        
-        let graphqlData = jsonResult["data"] as? [String: Any];
-        guard let graphqlData = graphqlData else {
-            throw GraphqlClientErrors.invalidResult
-        }
-        guard let allBooks = graphqlData["allBooks"] else {
-            throw GraphqlClientErrors.invalidResult
-        }
-        
-        let data = try JSONSerialization.data(withJSONObject: allBooks)
+        let data = try await networkRequest(request);
         
         return try produceResult(data)
     }

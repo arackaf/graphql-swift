@@ -8,13 +8,17 @@ enum NetworkRequestError: Error {
     case nonJsonResponse
 }
 
-func networkRequest(_ request: URLRequest) async throws -> Data? {
+func networkRequest(_ request: URLRequest) async throws -> Data {
     let urlSession = URLSession(configuration: .ephemeral)
     
     return try await withUnsafeThrowingContinuation { cont in
         urlSession.dataTask(with: request) { data, response, error in
             if let error = error {
                 cont.resume(throwing: error)
+                return
+            }
+            guard let data = data else {
+                cont.resume(throwing: NetworkRequestError.noResponse)
                 return
             }
             guard let response = response else {
@@ -34,10 +38,7 @@ func networkRequest(_ request: URLRequest) async throws -> Data? {
 
 func jsonRequest(_ request: URLRequest) async throws -> [String: Any] {
     let data = try await networkRequest(request)
-    
-    guard let data = data else {
-        throw NetworkRequestError.badData
-    }
+
     guard let jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
         print("Error: Cannot convert data to JSON object")
         
