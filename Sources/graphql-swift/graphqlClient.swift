@@ -43,6 +43,10 @@ open class GraphqlClient {
         return result
     }
     
+    open func encodeRequestBody<D: Codable>(_ request: GenericGraphQLRequest<D>) throws -> Data {
+        return try encodeBody(request)
+    }
+    
     public func runQuery<D, T>(_ request: QueryPacket<D, GraphqlResponse<T>>) async throws -> T {
         return try await run(requestBody: request.request) { (res) throws -> T in
             let decoder = JSONDecoder()
@@ -50,10 +54,6 @@ open class GraphqlClient {
             
             return result.data
         }
-    }
-    
-    open func encodeRequestBody<D: Codable>(_ request: GenericGraphQLRequest<D>) throws -> Data {
-        return try encodeBody(request)
     }
     
     public func runSchemaQuery<T>(_ query: String, _ produceResult: (([String: Any]) throws -> T)) async throws -> T {
