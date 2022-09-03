@@ -133,10 +133,15 @@ class \(type.name)Builder: GraphqlResults {
         let capitalizedName = query.name.prefix(1).capitalized + query.name.dropFirst()
         let filtersType = "\(capitalizedName)Filters"
         let requestType = "GenericGraphQLRequest<\(filtersType)>"
-        let funcReturnType = "QueryPacket<\(filtersType), \(query.returnType)>"
+        let queryReturnType = "\(capitalizedName)Results"
+        let funcReturnType = "QueryPacket<\(filtersType), GraphqlResponse<\(queryReturnType)>>"
         
         //\(query.returnType)?
         let funcDefinition = """
+struct \(queryReturnType): Codable {
+    let \(query.name): \(query.returnType)
+}
+
 func \(query.name)(_ filters: \(filtersType), buildSelection: (\(query.rootReturnType)Builder) -> ()) throws -> \(funcReturnType) {
     let selectionBuilder = \(query.rootReturnType)Builder()
     buildSelection(selectionBuilder)
@@ -144,7 +149,7 @@ func \(query.name)(_ filters: \(filtersType), buildSelection: (\(query.rootRetur
     let selectionText = try selectionBuilder.emit()
     let query = getQueryText(selectionText);
 
-    return (\(requestType)(query: query, variables: filters), \(query.returnType).self)
+    return (\(requestType)(query: query, variables: filters), GraphqlResponse<\(queryReturnType)>.self)
 }
 """
         

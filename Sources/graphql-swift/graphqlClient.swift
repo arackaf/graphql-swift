@@ -2,6 +2,10 @@ import Foundation
 
 public typealias QueryPacket<Req: Codable, Res: Codable> = (request: GenericGraphQLRequest<Req>, SerializedResult: Res.Type)
 
+public struct GraphqlResponse<T: Codable>: Codable {
+    public let data: T
+}
+
 public struct GenericGraphQLRequest<T: Codable> : Codable {
     public let query: String
     public let variables: T
