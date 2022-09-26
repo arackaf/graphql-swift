@@ -14,7 +14,7 @@ enum AuthError: Error {
 }
 
 func authenticate() async throws -> String {
-    let loginUrl = URL(string: "https://my-library-io.herokuapp.com/login-ios")!
+    let loginUrl = URL(string: "https://mylibrary.io/login-ios")!
     let login = Login(email: username, password: password);
     
     guard let loginRequestPacket = try? JSONEncoder().encode(login) else {

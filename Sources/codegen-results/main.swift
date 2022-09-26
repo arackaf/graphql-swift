@@ -39,7 +39,8 @@ func foo() async throws {
     }
     
 
-    let client = AuthenticatedGraphqlClient(endpoint: URL(string: "https://my-library-io.herokuapp.com/graphql-ios")!)
+    //let client = AuthenticatedGraphqlClient(endpoint: URL(string: "https://my-library-io.herokuapp.com/graphql-ios")!)
+    let client = AuthenticatedGraphqlClient(endpoint: URL(string: "https://mylibrary.io/graphql-ios")!)
     
     func decode(_ json: Data) -> BookQueryResults? {
         let decoder = JSONDecoder()
